@@ -22,6 +22,12 @@ If you need fast native code, your options are pretty much... You will be limite
 
 All Schemes have a fast startup time, or do they?
 
+## If you need Scheme to learn about programming
+
+Most compatible Scheme to work through SICP, How to Design Programs, ...
+
+Racket with its GUI as a first programming language?
+
 ## If you need a Scheme for a niche application
 
 Embedded systems
