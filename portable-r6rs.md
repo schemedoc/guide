@@ -1,0 +1,103 @@
+Here are some common pitfalls when writing R6RS code that creates problems when moving between Schemes.
+
+## Depending on argument evaluation order
+
+Arguments to procedures are not guaranteed to be evaluated left-to-right or right-to-left. Arguments will be evaluated in *some* order, which means they will not be evaluated concurrently, but the order itself is not something to rely on. Many implementations take the easy way out and evaluate left-to-right, but optimizing compilers like Chez Scheme can often generate better code (e.g. using fewer temporary values) by reordering evaluation.
+
+Example of bad code:
+
+```scheme
+(display
+ (call-with-port (open-file-output-port "test.dat" (file-options no-fail))
+   (lambda (p)
+     (list (begin (put-u8 p 97) (port-position p))
+           (begin (put-u8 p 98) (port-position p))))))
+```
+
+This may print (1 2) or (2 1) and the file may contain "ab" or "ba".
+
+Move the side-effects to outside of the arguments instead.
+
+## Depending on `let` evaluation order
+
+This is really the same as the above, since `(let ((lhs* rhs*) ...) . body)` can expand to `((lambda (lhs* ...) . body) rhs* ...)`. An example:
+
+```scheme
+(let ((x (read))
+      (y (read)))
+  (display (list x y)))
+```
+
+Given the input "1 2" this may print "(1 2)" or "(2 1)".
+
+Use `let*` instead.
+
+## Depending on `map` evaluation order
+
+The `map` procedure may call its given procedure on the elements of the list in any order.
+
+Do not use side-effects in the procedure given to map. If you need an ordered `map` procedure then try `map-in-order` from SRFI-1 or write your own.
+
+## Depending on `eq?` of integers
+
+Integers, not even small ones, are not guaranteed to be `eq?`. Therefore `(eq? x 0)` may evaulate to `#f` or `#t` no matter if `x` or `0` or not.
+
+Use `eqv?` or `=` instead.
+
+## Library version numbers
+
+R6RS specifies that libraries may have version numbers, e.g.:
+
+```scheme
+(library (foo (1 2 0))
+   (export foo)
+   (import (rnrs (6)))
+(define foo 'foo))
+```
+
+These version numbers are not generally useful. Normally the only one supported well enough is the `(6)` in `(rnrs lib* ... (6))`, and it is simply ignored to compared with `(6)`. The library name to filename mapping was not standardized by R6RS and most implementations adopted a convention where multiple versions of a library cannot be installed simultaneously (Racket being the exception to this).
+
+The library name to filename mapping problem is solved by using a package manager like Akku, but not even Akku handles library version numbers. The package manager solves the problem that was supposed to be solved by version numbers.
+
+## Depending on fixnum width
+
+R6RS guarantees that an implementation's fixnum library handles fixed-precision signed integers of some bitwidth *w*, integers in the range [−2<sup>*w*−1</sup>, 2<sup>*w*−1</sup> − 1].
+
+In most implementation models the fixnum width is 61 or 30, due to how objects are represented in memory. Ypsilon has the largest fixnum width, 63. IronScheme uses 32 bits since it allocates objects for fixnums whereas most other Schemes can encode fixnums directly in the pointer.
+
+But 24 bits is the smallest width that is guaranteed by the standard, i.e. -8388608 to 8388607.
+
+Example of non-portable code:
+
+```scheme
+(define (add1 x)
+  (fxand #xFFFFFFFF (fx+ x 1)))
+```
+
+Use generic `+`, `-`, etc, and the `(rnrs arithmetic bitwise (6))` library if your integers need more than 24-bit width. If you need the performance then use a wrapper library like [(hashing fixnums)](https://github.com/weinholt/hashing/blob/master/fixnums.sls).
+
+## Depending on native endianness
+
+While most machines today are little endian, meaning that integers larger than 8 bits are stored from the least significant byte to the most significant, there are still big endian machines. The `(rnrs bytevectors (6))` library has procedures that take an endianness when this is relevant. R6RS also makes provisions for other endianness variations than `big` or `little`, which do exist on some machines for some data types, but this is not in use today.
+
+Use native endianness when the bytevectors will stay in memory and will not be written to disk, the network or passed to libraries that expect a particular endianness. Otherwise, explicitly specify little or big endianness. Usually the file format or network protocol specifies that one or the other must be used.
+
+# Implementation notes
+
+Sometimes there is nothing wrong with your code, but you can't get it running on some Scheme implementation. This is usually a bug in the implementation, but it may not be fixed for a very long time.
+
+Weinholt has created [Docker images for most R6RS Scheme implementations](https://hub.docker.com/u/weinholt). These have one thing in common: they can all run Scheme scripts that start with `#!/usr/bin/env scheme-script`. These can be useful when you want to test your code.
+
+## Chez Scheme
+
+If your code runs in another Scheme but mysteriously fails in Chez Scheme then be on the lookout for code that assumes a particular evaluation order.
+
+## GNU Guile
+
+Guile has problems with some R6RS lexical syntax. Escapes in symbols are not handled right. Escapes in strings and backslashes at the end of lines in strings are not supported by default, but must be enabled with `(read-enable 'r6rs-hex-escapes)` and `(read-enable 'hungry-eol-escapes)`.
+
+Guile does not use `.guile.sls` and `.sls` by default; they need to be added to `%load-extensions`.
+
+Guile does not ignore the `#!/usr/bin/env scheme-script` line at the start of scripts. But it supports an old block comment syntax `#! foo !#`, so a workaround is to add `!#` on the second line of the script.
+
+Guile has some problems with built-in lexical identifiers like `else`. These are not exported from the standard library and your own macros may inadvertently replace them if they appear in `syntax-rules` or `syntax-case`.
