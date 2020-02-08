@@ -66,6 +66,11 @@ addition to the old *syntax-rules*. *syntax-case* can run arbitrary
 Scheme code to build the macro expansion while maintaining hygiene by
 default.
 
+The small edition of the R7RS language provides only *define-syntax*
+and *syntax-rules*. The R7RS large language (work in progress) may
+also provide either *syntax-case* or another powerful hygienic macro
+system.
+
 ## Non-standard, hygienic macros (implicit/explicit renaming)
 
 Some Scheme implementations have *ir-macro-transformer* and/or
