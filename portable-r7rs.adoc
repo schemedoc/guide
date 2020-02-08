@@ -1,0 +1,18 @@
+# Portable Scheme guide (R7RS)
+
+## Command line options
+
+These command line flags put Scheme implementations in R7RS mode:
+
+|=====
+|Chibi-Scheme|`chibi-scheme` (R7RS mode is the default)
+|Chicken|`csc -R r7rs` and `csi -R r7rs`
+|Cyclone|`cyclone` and `icyc` (R7RS mode is the default)
+|Gambit|`gsc -:r7rs` and `gsi -:r7rs`
+|Gauche|`gosh -r 7`
+|Gerbil|`gxi --lang r7rs`
+|Guile|`guile --r7rs`
+|Kawa|`kawa --r7rs`
+|Larceny|`larceny -r7rs`
+|Sagittarius|`sagittarius -r 7` and `sash -r 7`
+|=====
