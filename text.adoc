@@ -1,0 +1,182 @@
+# Text handling
+
+This is a guide for common character and string tasks.
+
+## Data types
+
+Scheme has had standard _string_ and _character_ datatypes since
+forever. They are fully distinct types: a character is neither a
+string nor an integer. _String_, _bytevector_, _vector_ and _list_ are
+also distinct types: none of them is a subtype of another.
+
+### Unicode and multi-byte character encodings
+
+A Scheme character object represents one Unicode codepoint.
+*char->integer* and *integer->char* convert between integer codepoints
+and character objects. `(map char->integer (string->list s))` shows
+all the codepoints in the string _s_.
+
+### Mutable vs immutable strings
+
+Scheme strings are generally mutable. This means you can change
+individual characters in the string using *string-set!* at any time
+after the string has been created.
+
+_However,_ actual Scheme code that mutates strings is somewhat rare.
+It is generally best to avoid mutating them if you can manage without.
+In the medium-to-long term, Scheme may evolve in a direction where
+strings are immutable, or where mutable strings are second-class
+citizens and immutable strings are the default thing to use.
+
+## Libraries
+
+Scheme has had several standard *char-* and *string-* procedures since
+forever (R2RS). Since R6RS they have been Unicode-aware.
+
+*SRFI 13* (_String Libraries_) is the most popular library for extra
+convenience. *SRFI 130* (_Cursor-based string library_) is mostly a
+drop-in replacement, but additionally supports _string cursors_ for
+walking a string character-by-character while keeping track of the
+current position.
+
+*R7RS:* If you don't need string cursors, you can use the following
+*cond-expand*. It will import whichever one of 130 and 13 is available
+in any given Scheme implementation. Almost all R7RS Schemes come with
+one or both libraries.
+
+-----
+(cond-expand ((library (srfi 130)) (import (srfi 130)))
+             ((library (srfi 13))  (import (srfi 13))))
+-----
+
+## Classify characters
+
+* *char-alphabetic?*
+* *char-numeric?*
+* *char-whitespace?*
+* *char-upper-case?*
+* *char-lower-case?*
+
+*SRFI 175* (_ASCII character library_) has ASCII-only versions of
+these.
+
+## Compare characters
+
+* *char-ci=?*
+* *char-ci<?*
+* *char-ci>?*
+* *char-ci<=?*
+* *char-ci>=?*
+
+## Compare strings
+
+* *string-ci=?*
+* *string-ci<?*
+* *string-ci>?*
+* *string-ci<=?*
+* *string-ci>=?*
+
+## Change letter case
+
+* *char-upcase*
+* *char-downcase*
+
+* *string-upcase*
+* *string-downcase*
+
+*SRFI 129* (_Titlecase procedures_) has Unicode-aware title-casing.
+
+## Convert between numbers and text
+
+*string->number* and *number->string* deal with Scheme syntax.
+(*number->string* _number_ _base_) can output binary, octal or
+hexadecimal numbers.
+
+*digit-value* (standard in R7RS) converts an individual character to a
+number.
+
+## Convert between bytes and text
+
+*string->utf8* and *utf8->string* take care of most needs.
+
+## Programming tactics
+
+### Making new strings
+
+Scheme does not have lazy strings (or "ropes"). Doing (*string-append*
+_a_ _b_) makes copies of the underlying bytes of both _a_ and _b_. The
+resulting string does not share structure with _a_ or _b_. This means
+building new strings is somewhat expensive.
+
+### Building a string one character at a time
+
+*list->string* allows accumulating individual characters into a list
+and then turning them into a string at the end. This is fast enough
+for everyday tasks.
+
+-----
+(let letters ((cc (char->integer #\a)) (chars '()))
+  (if (<= cc (char->integer #\z))
+      (letters (+ cc 1) (cons (integer->char cc) chars))
+      (list->string (reverse chars))))
+-----
+
+Same without the *reverse*:
+
+-----
+(let letters ((cc (char->integer #\z)) (chars '()))
+  (if (< cc (char->integer #\a))
+      (list->string chars)
+      (letters (- cc 1) (cons (integer->char cc) chars))))
+-----
+
+### Building a string as if writing to a port
+
+R7RS has a standard *open-output-string* procedure. Writing to a
+string output port can be faster (and in some cases more convenient)
+than *list->string*.
+
+-----
+(call-with-port (open-output-string)
+  (lambda (out)
+    (let letters ((cc (char->integer #\a)))
+      (cond ((<= cc (char->integer #\z))
+             (write-char (integer->char cc) out)
+             (letters (+ cc 1)))
+            (else (get-output-string out))))))
+-----
+
+### Reading text from ports
+
+*read-char* (R7RS) a.k.a *get-char* (R6RS) reads a character at a time
+from a string port. In some cases, using a byte port instead of a
+string port can yield an approach that is more resilient against
+character encoding gotchas, and *utf8->string* can be called once
+after reading a bytevector instead of constructing the string
+character-by-character.
+
+### Reading from strings
+
+A string can be iterated by incrementing the character index in a
+loop:
+
+-----
+(define (display-chars s)
+  (let ((n (string-length s)))
+    (let loop ((i 0))
+      (when (< i n)
+        (display (string-ref s i))
+        (newline)
+        (loop (+ i 1))))))
+-----
+
+*string-ref* is a constant-time operation in implementations that
+store string characters internally as a vector of 32-bit integers.
+Implementations that store a string as UTF-8 generally have to
+traverse the string from the beginning for each *string-ref*.
+
+### Reading from strings as if they were ports
+
+R7RS has a standard *open-input-string* procedure. Reading from a
+string port can be faster than *string-ref* depending on the
+implemnetation.
