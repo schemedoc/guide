@@ -1,0 +1,108 @@
+# Macros
+
+This guide details which macro systems are supported in Scheme, and
+when and how to use each of them.
+
+## Introduction to Scheme macros
+
+Other Lisp dialects such as Common Lisp generally specify a simple
+macro system in which all macros in that language are written. These
+macro systems are _non-hygienic_, which means that macro definitions
+must be careful not to _capture_ identifiers (symbols) at the macro
+call site that happen to have the same name.
+
+To combat the problem of variable capture, Scheme implementations have
+a long tradition of _hygienic macros_ which make sure the identifiers
+used in macro definitions are automatically distinct from any
+like-named identifiers at the call site.
+
+Unfortunately hygienic macros are a complex topic and no particular
+macro system has been agreed upon as the best. Hence one Scheme
+implementation can support more than one macro system, and in fact the
+bigger ones generally do. This fact can be quite confusing to people
+coming from other Lisps, and is worth emphasizing.
+
+## Attitudes toward hygienic macros
+
+Some Scheme programmers are especially passionate about hygienic
+macros and feel that hygiene is one of the essential features that
+make Scheme a good language.
+
+However, such praise is not universal. In the opposite camp, a handful
+of Schemers believe the problems avoided by hygienic macros are not
+serious enough to justify the complexity of hygienic macro systems.
+(Even fans of hygienic macros generally concede that they add
+significant complexity.) Hence a handful of Scheme implementations do
+not have a hygienic macro system at all. These are generally small
+implementations: large implementations tend to favor giving
+programmers more alternatives of all kinds.
+
+Perhaps the majority of Schemers do not feel particularly strongly
+about the topic. Most prefer hygienic macros where available but are
+not picky about it. They think hygienic macros are just one of
+Scheme's many useful features, and the language has plenty to offer
+even without them.
+
+## Non-standard, non-hygienic macros (define-macro)
+
+Some Scheme implementations have a *define-macro* which is almost
+identical to the *defmacro* in Common Lisp, Emacs Lisp, and Clojure.
+It is a simple, non-hygienic macro system true to the wider Lisp
+tradition.
+
+## Standard, hygienic macros (syntax-rules, syntax-case)
+
+The first Scheme standard to tackle macros was R4RS (1991). It said
+that macros may be defined using *define-syntax* (note:
+*define-syntax* is different from *define-macro*). It also said the
+*syntax-rules* macro system must be supported by all implementations
+of the standard. *syntax-rules* is a simple yet surprisingly effective
+hygienic macro system based on pattern-matching and rewriting. Both
+*define-syntax* and *syntax-rules* have been a part of standard Scheme
+ever since.
+
+R6RS (2007) added a more complex macro system called *syntax-case* in
+addition to the old *syntax-rules*. *syntax-case* can run arbitrary
+Scheme code to build the macro expansion while maintaining hygiene by
+default.
+
+## Non-standard, hygienic macros (implicit/explicit renaming)
+
+Some Scheme implementations have *ir-macro-transformer* and/or
+*er-macro-transformer* as an alternative to *syntax-case*.
+
+## A practical approach
+
+Generally the best approach is to try writing a macro using
+*syntax-rules* first. It's simple to use and works well for most
+common tasks.
+
+If you run into its limitations, try *syntax-case* which is hygienic
+and a standard part of R6RS.
+
+If *syntax-case* is not available in the Scheme implementation you
+need, find out if it has *er-macro-transformer*.
+
+Finally, *define-macro* should get any job done in a pinch. People who
+are Lisp programmers but not Scheme aficionados should also be able to
+help you with *define-macro*, whereas the hygienic macro systems are
+not instantly recognizable to other Lispers. If you are coming to
+Scheme from another Lisp, it may be best to start with *define-macro*
+and work your way up to *syntax-rules* and then *syntax-case*.
+
+## Macro systems in Scheme implementations
+
+[options=header]
+|=====
+|Implementation|define-macro|syntax-rules|syntax-case|er-macro-
+|Bigloo|x|||
+|Chicken|x|||x
+|Chez Scheme||x|x|
+|Chibi-Scheme||x||x
+|Gambit|x|x||
+|Gauche||x||x
+|Ikarus||x|x|
+|Loko Scheme||x|x|
+|MIT Scheme||x||x
+|Sagittarius||x|x|x
+|=====
