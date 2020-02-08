@@ -16,3 +16,33 @@ These command line flags put Scheme implementations in R7RS mode:
 |Larceny|`larceny -r7rs`
 |Sagittarius|`sagittarius -r 7` and `sash -r 7`
 |=====
+
+## Recommended SRFIs
+
+### R7RS Large Edition
+
+These are SRFIs most widely supported by R7RS implementations, and on
+track to be included in the upcoming Large Edition of the R7RS
+language. Right now, it's generally best to use the SRFI imports to
+get at these libraries. The R7RS-large library names are not yet as
+portable.
+
+[options=header]
+|=====
+|Task|Current SRFI import|Future R7RS-large import
+|List library|`(srfi 1)`|`(scheme list)`
+|Hash tables|`(srfi 125)`|`(scheme hash-table)`
+|Sort libraries|`(srfi 132)`|`(scheme sort)`
+|Bitwise operations|`(srfi 151)`|`(scheme bitwise)`
+|=====
+
+### Other
+
+The following SRFIs are the most widely supported ones for tasks that
+R7RS-large is not currently planned to cover:
+
+[options=header]
+|=====
+|Task|SRFI import
+|Environment variables|`(srfi 98)`
+|=====
