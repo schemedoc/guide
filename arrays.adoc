@@ -1,0 +1,113 @@
+# Arrays and vectors
+
+## Lists vs vectors
+
+Like most Lisp dialects, Scheme is based heavily around the _list_
+datatype. Around Lisp and most functional programming languages, the
+word _list_ always refers to a _linked list_ built out of _pairs_,
+where each pair contains one list element and a pointer to the next
+pair.
+
+Also like most Lisp dialects, Scheme has a built-in _vector_ datatype.
+Whereas a list is built out of out of interlinked but still separate
+objects, a vector is a single object. The _elements_ of a vector are
+still separate objects from the vector itself, but the "spine" of the
+vector that holds the elements together is not divided into parts the
+way the "spine" of a list is.
+
+## Efficiency
+
+The reason for a separate vector datatype is efficiency. Every link in
+a linked list takes up a little memory. By contrast, a _n_-element
+vector is stored internally as an array of _n_ machine words. An
+additional machine word is not needed for each element to point to the
+next pair: since a machine word takes up a constant number of bytes in
+memory, the memory address of the _k_'th element (using zero-based
+indexing) is simply _k_ times the machine word size. Hence vector
+lookup is a constant-time operation, whereas list lookup is O(_n_).
+
+The advantages of (linked) lists are:
+
+* A list can share structure with one or more other lists.
+* Inserting an element at the head of the list is an O(1) operation;
+  for a vector it is O(n).
+
+## Vectors vs arrays
+
+A vector is a one-dimensional array. Unlike Common Lisp, Scheme does
+not have a standard multi-dimensional array type. (An _m_-by-_n_ array
+can be simulated using a vector with _m_ * _n_ elements.) However, a
+few Scheme implementations do have a real array datatype.
+
+## Standard vector types
+
+Scheme has had a standard *vector* datatype since R2RS (1985). This
+type can store any mix of arbitrary Scheme objects as its elements.
+
+Since R6RS (2007) there has also been a standard *bytevector*
+datatype. As the name implies, its elements can only be exact integers
+in the range 0..255. This makes it very fast and compact to handle raw
+bytes. The standard *string\->utf8* and *utf8\->string* procedures
+help convert between strings and bytevectors.
+
+## Non-standard numeric vector types
+
+SRFI 4 (_Homogeneous numeric vector datatypes_) supplies vectors
+specialized to store a particular type of number.
+
+### Integer vectors
+
+* u8vector -- vector of *unsigned* 8-bit exact integers
+* s8vector -- vector of *signed* 8-bit exact integers
+* u16vector -- etc.
+* s16vector -- vector of *signed* 16-bit exact integers
+* u32vector
+* s32vector
+* u64vector
+* s64vector
+
+The *u8vector* type is the same as the standard *bytevector* type.
+SRFI 4 was written before R6RS, so bytevectors didn't yet exist.
+
+### Floating-point vectors
+
+* f32vector -- vector of (at least) 32-bit inexact real numbers
+* f64vector -- vector of (at least) 64-bit inexact real numbers
+
+### Complex vectors
+
+SRFI 160 is a backward-compatible update of SRFI 4 that adds:
+
+* c64vector -- vector of complex numbers with 64-bit real part and 64-bit imaginary part
+* c128vector
+
+### Fixnum vectors
+
+Chez Scheme provides a *fxvector* type. It's a vector that stores
+*fixnum* values -- exact integers with a range that is the most
+convenient for the implementation to handle efficiently. Typically
+this range is the size of a machine word minus a few bits reserved for
+type tags.
+
+## Non-standard array types
+
+SRFI 25 (_Multi-dimensional Array Primitives_) provides
+
+## Types in Scheme implementations
+
+Every implementation below has the standard *vector* type.
+
+[options=header]
+|=====
+|Implementation|byte|us8|us16|us32|us64|f32|f64|c64|c128|array
+|Bigloo|x|||||||||
+|Chicken|x|||x||||||
+|Chez Scheme||x|x|||||||
+|Chibi-Scheme||x||x||||||
+|Gambit|x|x||||||||
+|Gauche||x||x||||||
+|Ikarus||x|x|||||||
+|Loko Scheme||x|x|||||||
+|MIT Scheme||x||x||||||
+|Sagittarius||x|x|x||||||
+|=====
