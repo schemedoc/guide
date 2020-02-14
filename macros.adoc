@@ -105,7 +105,7 @@ and work your way up to *syntax-rules* and then *syntax-case*.
 |Chez Scheme||x|x|
 |Chibi-Scheme||x||x
 |Gambit|x|x||
-|Gauche||x||x
+|Gauche|x|x||x
 |Ikarus||x|x|
 |Loko Scheme||x|x|
 |MIT Scheme||x||x
