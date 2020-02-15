@@ -196,3 +196,38 @@ make install
 -----
 src/gosh -ftest
 -----
+
+## Sagittarius
+
+|=====
+|*Implementation language:*|C and Scheme
+|*Version control:*|Git
+|*Build system:*|cmake & make
+|*Full build with bootstrap:*|TBD
+|*Documentation:*|README.md and HACKING
+|=====
+
+
+Sagittarius requires the latest released version installed before you can
+build from Git repository. Follow the documentation link below to get
+the tarball and install. Remember to add prefix when you run cmake:
+
+-----
+tar -xf sagittarius-0.9.5.tar.gz
+cd sagittarius-0.9.5
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/.local .
+make
+make install
+-----
+
+Now you can build from Git, the steps are almost identical as before
+except the new step `./dist.sh gen`:
+
+-----
+git clone https://bitbucket.org/ktakashi/sagittarius-scheme.git
+cd sagittarius-scheme
+./dist.sh gen
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/.local .
+make
+make install
+-----
