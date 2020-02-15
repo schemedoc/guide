@@ -66,6 +66,36 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.local/lib
 
 ### Troubleshooting
 
+## Cyclone
+
+|=====
+|*Implementation language:*|TBD
+|*Version control:*|Git
+|*Build system:*|make
+|*Full build with bootstrap:*|TBD
+|*Documentation:*|TBD
+|=====
+
+Cyclone requires an installed version to bootstrap. If you haven't had
+any, get it from cyclone-bootstrap repository
+
+-----
+git clone https://github.com/justinethier/cyclone-bootstrap.git
+cd cyclone-boostrap
+make PREFIX=$HOME/.local
+make PREFIX=$HOME/.local install
+-----
+
+Now you can build latest cyclone version, the steps are exactly the
+same:
+
+-----
+git clone https://github.com/justinethier/cyclone.git
+cd cyclone
+make PREFIX=$HOME/.local
+make PREFIX=$HOME/.local install
+-----
+
 ## Gambit
 
 |=====
