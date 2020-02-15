@@ -1,4 +1,4 @@
-# Foreign function interface
+# Foreign function interface (C)
 
 This is a guide to calling C code from Scheme.
 
