@@ -33,6 +33,7 @@ prefix.
 |*Version control:*|Git
 |*Build system:*|make
 |*Full build with bootstrap:*|2 minutes
+|*Documentation:*|doc/chibi.scrbl (Installation section)
 |=====
 
 -----
@@ -42,9 +43,25 @@ make PREFIX=$HOME/.local
 make install PREFIX=$HOME/.local
 -----
 
+To run installed chibi you need to setup `$CHIBI_MODULE_PATH` (running
+uninstalled does not need this because chibi can detect in that case).
+
+-----
+export CHIBI_MODULE_PATH=$HOME/.local/share/chibi:$HOME/.local/lib/chibi
+-----
+
+You may need to adjust `$LD_LIBRARY_PATH` as well because chibi-scheme
+binary does not have a default path for libchibi-scheme.so (you should
+see "error while loading shared libraries" if it's the case)
+
+-----
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.local/lib
+-----
+
 ### Testing uninstalled versions
 
 -----
+./chibi-scheme
 -----
 
 ### Troubleshooting
