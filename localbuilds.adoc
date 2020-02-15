@@ -1,0 +1,148 @@
+# Local builds
+
+## Introduction
+
+This guide explains how to make your own local builds of various
+Scheme implementations. That's useful if you want to:
+
+* use pre-release versions to get the very latest features
+
+* use custom build options
+
+* use an operating system that does not have a ready-to-run package of
+  the Scheme you want
+
+## Installation prefix
+
+On Unix-like operating systems, programs intended for all users are
+usually installed into `/usr` or `/usr/local`.
+
+For your own personal use, an emerging convention is to install into
+`~/.local`, i.e. a directory named `.local` under your home directory.
+This guide adopts that contention.
+
+Most Schemes have a *prefix* option in their build system that can be
+used to set the installation prefix to any directory you like. Hence,
+if you want something different than `~/.local`, just change the
+prefix.
+
+## Chibi-Scheme
+
+|=====
+|*Implementation language:*|C interpreter and OS interface, Scheme libraries
+|*Version control:*|Git
+|*Build system:*|make
+|*Full build with bootstrap:*|2 minutes
+|=====
+
+-----
+git clone https://github.com/ashinn/chibi-scheme.git
+cd chibi-scheme
+make PREFIX=$HOME/.local
+make install PREFIX=$HOME/.local
+-----
+
+### Testing uninstalled versions
+
+-----
+-----
+
+### Troubleshooting
+
+## Gambit
+
+|=====
+|*Implementation language:*|Scheme, with C for system interface
+|*Version control:*|Git
+|*Build system:*|GNU autotools & make
+|*Full build with bootstrap:*|30 minutes
+|=====
+
+Gambit requires a pre-built version of its `gsc` compiler in order to
+bootstrap itself. The bootstrap compiler is an executable at the root
+of its source directory by the name `gsc-boot`. If `make` does not
+find a `gsc-boot`, it looks for a `gsc` executable in `PATH` and makes
+a copy of it as `gsc-boot`.
+
+The usual way to get Gambit going on a new machine is to first install
+the latest release version, then use that to bootstrap the latest git
+master.
+
+-----
+git clone https://github.com/gambit/gambit.git
+cd gambit
+./configure --prefix=$HOME/.local
+make
+make modules
+make install
+-----
+
+### Testing uninstalled versions
+
+-----
+gsc/gsc ...
+gsi/gsi ...
+-----
+
+### Performance
+
+#### GCC vs clang
+
+GNU's `gcc` compiler builds Gambit significantly faster than LLVM's
+`clang` compiler. On some operating systems, notably MacOS, the `gcc`
+command actually runs `clang` (whose command-line interface is largely
+compatible with GNU `gcc`). You can check this with `gcc --version`:
+the output should say `LLVM` if it's actually clang.
+
+You can set the compiler command used to build Gambit like so:
+
+`./configure CC=gcc-9`
+
+Once Gambit has been built, there shouldn't be a substantial speed
+difference between the resulting executables. It's just the build
+itself that's slower with `clang`.
+
+#### Optimized single-host build
+
+`./configure --enable-single-host` generates a version of Gambit on
+which a good C compiler is able to do whole-program optimization. The
+resulting Gambit binaries can be significantly faster for
+performance-sensitive software. However, building Gambit this way
+takes a lot longer and requires more than a gigabyte of RAM.
+
+For pedestrian Scheme code there is little to no perceptible speed
+difference, so a non-single-host build is fine. Even a non-single-host
+Gambit is easily one of the fastest Scheme implementations available.
+
+Pre-packaged binaries of Gambit are generally single-host builds.
+
+#### Parallel builds
+
+`make -j` can significantly speed up Gambit builds if you have a fast
+multi-core CPU and lots of RAM.
+
+### Troubleshooting
+
+Sometimes big changes are made to Gambit which break your build,
+causing compiler errors (or in rare cases, a crashing `gsc` or `gsi`
+executable). In that case, try deleting the `boot` directory and the
+`gsc-boot` executable within Gambit's source directory (`rm -rf boot/
+gsc-boot`). That forces `make` to do a full bootstrap. Beware that
+this can take 30 minutes or more.
+
+## Gauche
+
+|=====
+|*Implementation language:*|C and Scheme
+|*Version control:*|Git
+|*Build system:*|GNU autotools & make
+|*Full build with bootstrap:*|5 minutes
+|=====
+
+-----
+git clone https://github.com/shirok/Gauche.git gauche
+cd gauche
+./configure --prefix=$HOME/.local
+make
+make install
+-----
