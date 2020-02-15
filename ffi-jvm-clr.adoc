@@ -1,0 +1,10 @@
+# Foreign function interface (Java and .NET)
+
+This is a guide to calling Java, C# and other JVM/CLR languages from
+Scheme.
+
+## Implementation support
+
+Implementations that *run on the JVM and have Java FFI*: Kawa
+
+Implementations that *run on the CLR and have C#/.NET FFI*: IronScheme
