@@ -137,12 +137,45 @@ this can take 30 minutes or more.
 |*Version control:*|Git
 |*Build system:*|GNU autotools & make
 |*Full build with bootstrap:*|5 minutes
+|*Documentation:*|HACKING.adoc
 |=====
+
+
+Gauche requires the latest released version installed before you can
+build from Git repository. Follow the documentation link below to get
+the tarball and install. Remember to add `--prefix` when you
+configure:
+
+-----
+# Browse http://practical-scheme.net/gauche/download.html
+tar -xf Gauche-0.9.9.tgz
+cd Gauche-0.9.9
+./configure --prefix=$HOME/.local
+make
+make install
+-----
+
+After this, make sure "gosh" is available. If not adjust `$PATH` for
+the current shell:
+
+-----
+export PATH=$PATH:$HOME/.local/bin
+-----
+
+Now you can build from Git, the steps are almost identical as before,
+except the new step `./DIST gen`.
 
 -----
 git clone https://github.com/shirok/Gauche.git gauche
 cd gauche
+./DIST gen
 ./configure --prefix=$HOME/.local
 make
 make install
+-----
+
+### Testing uninstalled versions
+
+-----
+src/gosh -ftest
 -----
