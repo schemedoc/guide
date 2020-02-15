@@ -227,6 +227,38 @@ make install
 src/gosh -ftest
 -----
 
+## Gerbil
+
+|=====
+|*Implementation language:*|TBD
+|*Version control:*|Git
+|*Build system:*|Scheme
+|*Full build with bootstrap:*|TBD
+|*Documentation:*|doc/guide/README.md and .travis.yml
+|=====
+
+Gerbil requires latest(?) Gambit Scheme installed. See above for more
+instructions. After that the build instructions are quite simple.
+
+-----
+git clone https://github.com/vyzo/gerbil.git
+cd gerbil/src
+./build.sh stage0
+./build.sh stage1 final
+./build.sh stdlib
+./build.sh lang
+./build.sh tools
+-----
+
+Note that because parallel builds are not supported and build.sh
+simply rebuilds everything. If you make changes in one part, stdlib
+for instance, just run build.sh for that part only. Otherwise it make
+take a long time.
+
+Note sure about installation. Gerbil documents seem to encourage
+running directly from source. The binaries are `bin/gxi` and
+`bin/gxc`.
+
 ## Sagittarius
 
 |=====
