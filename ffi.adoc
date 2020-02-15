@@ -1,0 +1,128 @@
+# Foreign function interface
+
+This is a guide to calling C code from Scheme.
+
+## Basic approaches
+
+### Compiler has FFI, interpreter does not
+
+(Are there Schemes like this?)
+
+### Compiler builds FFI stubs, interpreter can use them
+
+Gambit, ...
+
+### FFI stubs can be generated from the REPL
+
+Chez Scheme, ...
+
+## Get the current time from libc
+
+This is about the simplest possible example. `time(NULL)` is a
+well-known way to get the current time in C. The time is returned as
+the number of seconds elapsed since the epoch (on Unix, midnight,
+January 1st, 1970).
+
+### Chez Scheme
+
+From the REPL:
+
+-----
+> (define libc (load-shared-object "libc.so"))  ; libc.dylib on Mac
+> (define my-time (foreign-procedure "time" (uptr) unsigned-long))
+> (my-time 0)
+1581759013
+-----
+
+### Gambit
+
+Create a Scheme library `mytime.sld` with an FFI stub in it:
+
+-----
+(define-library (mytime)
+  (export mytime)
+  (import (gambit))
+  (begin (define mytime
+           (c-lambda () unsigned-long
+             "___return(time(NULL));"))))
+-----
+
+Compile the stub into a Unix object file (`mytime.o1`): `gsc mytime.sld`
+
+Use it from the REPL:
+
+-----
+$ gsi .
+> (import (mytime))
+> (mytime)
+1581758667
+-----
+
+## Return a string from C
+
+### Chibi-Scheme
+
+Create the Scheme library file `hello.sld`:
+
+-----
+(define-library (hello)
+  (export hello)
+  (include-shared "hello"))
+-----
+
+Create the FFI stub file `hello.stub`:
+
+-----
+(c-declare "
+static const char *my_hello(void) {
+  return \"Hello world\";
+}
+")
+
+(define-c (const string) (hello "my_hello") ())
+-----
+
+Generate a `hello.c` file for the FFI stub: `chibi-ffi hello.stub`
+
+Compile the stub into a Unix shared library (`hello.so` or `hello.dylib`):
+
+-----
+$ export PKG_CONFIG_PATH="$HOME/.local/lib/pkgconfig"  # May be needed
+$ chibi="$(pkg-config --libs --cflags chibi-scheme)"
+$ so=so     # Linux, BSD; etc.
+$ so=dylib  # Mac
+$ cc -Wall -fPIC -shared -o hello.$so hello.c $chibi
+-----
+
+Use it from the REPL:
+
+-----
+$ chibi-scheme
+> (import (hello))
+> (hello)
+"Hello world"
+-----
+
+### Gambit
+
+Create a Scheme library `hello.sld` with an FFI stub in it:
+
+-----
+(define-library (hello)
+  (export hello)
+  (import (gambit))
+  (begin (define hello
+           (c-lambda () nonnull-char-string
+             "___return(\"Hello world\");"))))
+-----
+
+Compile and link it into a Unix shared library: `gsc hello.sld`
+
+Use it from the REPL:
+
+-----
+$ gsi .
+> (import (hello))
+> (hello)
+"Hello world"
+-----
