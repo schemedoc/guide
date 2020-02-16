@@ -259,6 +259,25 @@ Note sure about installation. Gerbil documents seem to encourage
 running directly from source. The binaries are `bin/gxi` and
 `bin/gxc`.
 
+## Guile
+
+You may need to install required packages. See README for details.
+
+-----
+git clone git://git.sv.gnu.org/guile.git
+cd guile
+./autogen.sh
+./configure --prefix=$HOME/.local
+make
+make install
+-----
+
+### Testing uninstalled versions
+
+-----
+meta/guile
+-----
+
 ## Larceny
 
 |=====
