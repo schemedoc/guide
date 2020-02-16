@@ -259,6 +259,66 @@ Note sure about installation. Gerbil documents seem to encourage
 running directly from source. The binaries are `bin/gxi` and
 `bin/gxc`.
 
+## Larceny
+
+|=====
+|*Implementation language:*|Scheme
+|*Version control:*|Git
+|*Build system:*|Scheme and gcc
+|*Full build without bootstrap:*|3 minutes
+|*Documentation:*|doc/HOWTO-BUILD and doc/HOWTO-INSTALL
+|=====
+
+To build Larceny you need a Scheme system that can host Larceny. The
+easiest option is the prebuilt Larceny from
+http://www.larcenists.org/download.html if you don't have Larceny
+installed.
+
+The below build instructions are for linux on x86, taken from
+doc/HOWTO-BUILD. See that document for more details. The instructions
+are made for copy-pasting (or even put in a script and just run)
+
+-----
+tar -xf larceny-1.3-bin-native-ia32-linux86.tar.gz
+git clone https://github.com/larcenists/larceny.git
+cd larceny
+../larceny-1.3-bin-native-ia32-linux86/larceny <<EOF
+(load "setup.sch")
+(setup 'scheme: 'larceny 'host: 'linux86 'sassy)
+(build-config-files)
+(load-compiler)
+(build-heap)
+(build-runtime)
+(build-executable)
+(build-larceny-files)
+(build-twobit)
+(exit)
+EOF
+./larceny.bin -stopcopy -- src/Build/iasn-larceny-heap.fasl <<EOF
+(exit)
+EOF
+./larceny.bin -stopcopy -- src/Build/iasn-twobit-heap.fasl <<EOF
+(exit)
+EOF
+# At this point, you can delete the prebuilt binaries
+cp larceny twobit
+./larceny <<EOF
+(require 'r7rsmode)
+(larceny:compile-r7rs-runtime)
+(exit)
+EOF
+-----
+
+At this point you can just use larceny directly without installing
+(e.g. adjust `$PATH` to search for larceny script). See
+doc/HOWTO-INSTALL if you really want to install it.
+
+### Testing uninstalled versions
+
+-----
+./larceny
+-----
+
 ## Sagittarius
 
 |=====
