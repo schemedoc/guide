@@ -29,11 +29,33 @@ portable.
 
 [options=header]
 |=====
-|Task|Current SRFI import|Future R7RS-large import
-|List library|`(srfi 1)`|`(scheme list)`
-|Hash tables|`(srfi 125)`|`(scheme hash-table)`
-|Sort libraries|`(srfi 132)`|`(scheme sort)`
-|Bitwise operations|`(srfi 151)`|`(scheme bitwise)`
+|Task|Current SRFI import|Future R7RS-large import|Edition
+|List library          |`(srfi 1)`  |`(scheme list)`          |Red
+|Charset library       |`(srfi 14)` |`(scheme charset)`       |Red
+|Streams library       |`(srfi 41)` |`(scheme stream)`        |Red
+|Functional, random-access pairs and lists|`(srfi 101)`|`(scheme rlist)`|Red
+|Boxes                 |`(srfi 111)`|`(scheme box)`           |Red
+|Sets and bags         |`(srfi 113)`|`(scheme set)`           |Red
+|Regular expressions   |`(srfi 115)`|`(scheme regex)`         |Tangerine
+|Immutable lists       |`(srfi 116)`|`(scheme ilist)`         |Red
+|Queued-based lists    |`(srfi 117)`|`(scheme list-queue)`    |Red
+|Generators            |`(srfi 121)`|`(scheme generator)`     |Red
+|Ephemerons            |`(srfi 124)`|`(scheme ephemeron)`     |Red
+|Hash tables           |`(srfi 125)`|`(scheme hash-table)`    |Red
+|Lazy sequences        |`(srfi 127)`|`(scheme lseq)`          |Red
+|Comparators           |`(srfi 128)`|`(scheme comparator)`    |Red
+|Sort libraries        |`(srfi 132)`|`(scheme sort)`          |Red
+|Vector library        |`(srfi 133)`|`(scheme vector)`        |Red
+|Immutable deques      |`(srfi 134)`|`(scheme ideque)`        |Red
+|Immutable strings     |`(srfi 135)`|`(scheme text)`          |Red
+|Integer division      |`(srfi 141)`|`(scheme division)`      |Tangerine
+|Flonums               |`(srfi 144)`|`(scheme flonum)`        |Tangerine
+|Mappings              |`(srfi 146)`|`(scheme mapping)`       |Tangerine
+|Bitwise operations    |`(srfi 151)`|`(scheme bitwise)`       |Tangerine
+|Generators            |`(srfi 158)`|`(scheme generator)`     |Tangerine
+|Combinator Formatting |`(srfi 159)`|`(scheme show)`          |Tangerine
+|Homogeneous vectors   |`(srfi 160)`|`(scheme vector @)`      |Tangerine
+|Byte vectors          |R6RS bytevectors|`(scheme bytevector)`|Tangerine
 |=====
 
 ### Other
