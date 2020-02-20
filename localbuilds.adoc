@@ -61,7 +61,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.local/lib
 ### Testing uninstalled versions
 
 -----
-./chibi-scheme
+./tools/chibi-run
 -----
 
 ### Troubleshooting
