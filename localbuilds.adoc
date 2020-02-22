@@ -19,7 +19,7 @@ usually installed into `/usr` or `/usr/local`.
 
 For your own personal use, an emerging convention is to install into
 `~/.local`, i.e. a directory named `.local` under your home directory.
-This guide adopts that contention.
+This guide adopts that convention.
 
 Most Schemes have a *prefix* option in their build system that can be
 used to set the installation prefix to any directory you like. Hence,
