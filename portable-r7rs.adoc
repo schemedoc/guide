@@ -58,7 +58,32 @@ portable.
 |Byte vectors          |R6RS bytevectors|`(scheme bytevector)`|Tangerine
 |=====
 
-### Other
+### R7RS Large Edition dockets
+
+R7RS-large is developed by assigning candidate SRFIs to *color
+dockets* that concern different aspects of the language. Over time,
+the language working group (WG2) selects the most appropriate SRFIs
+from each docket to go into the final language.
+
+[options=header]
+|====
+|Docket|Concerns
+|Red|data structures
+|Tangerine|numerics
+|Orange|numerics
+|Amber|syntax
+|Yellow|syntax
+|Lime|portable
+|Green|non-portable
+|Olive|non-portable
+|Aqua|portable but complex things
+|Blue|portable but advanced things
+|Indigo|stuff of dubious utility
+|====
+
+https://bitbucket.org/cowan/r7rs-wg1-infra/src/default/ColorDockets.md[Detailed list]
+
+### Other SRFIs
 
 The following SRFIs are the most widely supported ones for tasks that
 R7RS-large is not currently planned to cover:
