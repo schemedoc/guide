@@ -58,6 +58,35 @@ $ gsi .
 1581758667
 -----
 
+### CHICKEN
+
+Make sure to have the r7rs egg installed: `chicken-install r7rs`
+
+Create a Scheme library `mytime.sld` with an FFI stub in it:
+
+-----
+(define-library (mytime)
+  (export mytime)
+  (import (scheme base) (chicken foreign))
+  (begin
+    (define mytime
+      (foreign-lambda* unsigned-long ()
+       "C_return(time(NULL));"))))
+-----
+
+Compile the stub into a Unix object file (`mytime.so`) with matching
+import library (`mytime.import.scm`): `csc -X r7rs -R r7rs -sJ mytime.sld`
+
+Use it from the REPL:
+
+-----
+$ csi
+#;1> (import (mytime))
+#;2> (mytime)
+1589710285
+-----
+
+
 ## Return a string from C
 
 ### Chibi-Scheme
@@ -124,5 +153,33 @@ Use it from the REPL:
 $ gsi .
 > (import (hello))
 > (hello)
+"Hello world"
+-----
+
+
+### CHICKEN
+
+Make sure to have the r7rs egg installed: `chicken-install r7rs`
+
+Create a Scheme library `hello.sld` with an FFI stub in it:
+
+-----
+(define-library (hello)
+  (export hello)
+  (import (scheme base) (chicken foreign))
+  (begin (define hello
+           (foreign-lambda* c-string ()
+             "C_return(\"Hello world\");"))))
+-----
+
+Compile the stub into a Unix object file (`hello.so`) with matching
+import library (`hello.import.scm`): `csc -X r7rs -R r7rs -sJ hello.sld`
+
+Use it from the REPL:
+
+-----
+$ csi
+#;1> (import (hello))
+#;2> (hello)
 "Hello world"
 -----
