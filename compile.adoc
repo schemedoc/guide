@@ -50,3 +50,58 @@ difficult problems.
   in the same directory and compiling your code from scratch. `gsc`
   can use existing files as cached build steps, and things sometimes
   get out of sync.
+
+
+## CHICKEN Scheme
+
+### Overview
+
+The CHICKEN compiler translates Scheme to C, and then calls upon the
+system C compiler to turn that C into executable files, object files
+or shared object files.
+
+To build an executable called `foo` from the file `foo.scm`:
+
+`csc foo.scm`
+
+To build a shared object `foo.so` which can be loaded into a running
+Scheme program using `load`:
+
+`csc -shared foo.scm`
+
+To build a shared object for embedding into a C program:
+
+`csc -shared -embedded foo.scm`
+
+### Shell command
+
+The translator is called `chicken`, but for most normal uses you want
+to use the `csc` frontend which will call the C compiler for you.
+
+### Help
+
+`csc -help` shows usage.  There is also a manpage: `man csc`.
+
+The http://wiki.call-cc.org/man/5/Using%20the%20compiler[CHICKEN manual]
+has details.
+
+The CHICKEN mailing list and IRC channel are the best places to ask
+for help with more difficult problems.
+
+### Showing optimized Scheme code
+
+This command will show you the expressions after final analysis, in
+CPS form:
+
+`csc -debug 7 foo.scm`
+
+### Viewing generated C code
+
+By default, the compiler will delete the intermediate C files it
+generates.  To keep generated files, use `-k`:
+
+`csc -k foo.scm`
+
+### Showing disassembly of compiled Scheme code
+
+`csc foo.scm && objdump -d foo`
