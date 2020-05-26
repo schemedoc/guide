@@ -66,6 +66,52 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.local/lib
 
 ### Troubleshooting
 
+## CHICKEN
+
+|=====
+|*Implementation language:*|Scheme, some C
+|*Version control:*|Git
+|*Build system:*|GNU Make
+|*Full build with bootstrap:*|7 minutes
+|*Documentation:*|README, "Bootstrapping" section
+|=====
+
+The CHICKEN project occasionally publishes prerelease
+https://code.call-cc.org/dev-snapshots/[development snapshots] which
+you can use to bootstrap from when you want to build from Git.
+
+These snapshots require just a C compiler and specifically GNU make.
+If you are on a system where `make` refers to BSD make, use `gmake` or
+`gnumake` instead of `make` in the command below.
+
+To make things easy, there's a script in the git repository which will
+perform the bootstrapping for you:
+
+-----
+git clone git://code.call-cc.org/chicken-core
+PLATFORM=linux ./scripts/bootstrap.sh
+-----
+
+When the bootstrap script is done, it prints instructions on what to
+do next:
+
+-----
+Now, build chicken by passing "CHICKEN=./chicken-boot" to make,
+in addition to PREFIX, PLATFORM, and other parameters.
+-----
+
+Let's do just that:
+
+-----
+make PLATFORM=linux CHICKEN=./chicken-boot PREFIX=$HOME/.local install
+-----
+
+### Testing uninstalled versions
+
+-----
+LD_LIBRARY_PATH=. ./csi
+-----
+
 ## Cyclone
 
 |=====
@@ -371,50 +417,4 @@ cd sagittarius-scheme
 cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/.local .
 make
 make install
------
-
-## CHICKEN
-
-|=====
-|*Implementation language:*|Scheme, some C
-|*Version control:*|Git
-|*Build system:*|GNU Make
-|*Full build with bootstrap:*|7 minutes
-|*Documentation:*|README, "Bootstrapping" section
-|=====
-
-The CHICKEN project occasionally publishes prerelease
-https://code.call-cc.org/dev-snapshots/[development snapshots] which
-you can use to bootstrap from when you want to build from Git.
-
-These snapshots require just a C compiler and specifically GNU make.
-If you are on a system where `make` refers to BSD make, use `gmake` or
-`gnumake` instead of `make` in the command below.
-
-To make things easy, there's a script in the git repository which will
-perform the bootstrapping for you:
-
------
-git clone git://code.call-cc.org/chicken-core
-PLATFORM=linux ./scripts/bootstrap.sh
------
-
-When the bootstrap script is done, it prints instructions on what to
-do next:
-
------
-Now, build chicken by passing "CHICKEN=./chicken-boot" to make,
-in addition to PREFIX, PLATFORM, and other parameters.
------
-
-Let's do just that:
-
------
-make PLATFORM=linux CHICKEN=./chicken-boot PREFIX=$HOME/.local install
------
-
-### Testing uninstalled versions
-
------
-LD_LIBRARY_PATH=. ./csi
 -----

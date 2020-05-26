@@ -34,30 +34,6 @@ From the REPL:
 1581759013
 -----
 
-### Gambit
-
-Create a Scheme library `mytime.sld` with an FFI stub in it:
-
------
-(define-library (mytime)
-  (export mytime)
-  (import (gambit))
-  (begin (define mytime
-           (c-lambda () unsigned-long
-             "___return(time(NULL));"))))
------
-
-Compile the stub into a Unix object file (`mytime.o1`): `gsc mytime.sld`
-
-Use it from the REPL:
-
------
-$ gsi .
-> (import (mytime))
-> (mytime)
-1581758667
------
-
 ### CHICKEN
 
 Make sure to have the r7rs egg installed: `chicken-install r7rs`
@@ -84,6 +60,30 @@ $ csi
 #;1> (import (mytime))
 #;2> (mytime)
 1589710285
+-----
+
+### Gambit
+
+Create a Scheme library `mytime.sld` with an FFI stub in it:
+
+-----
+(define-library (mytime)
+  (export mytime)
+  (import (gambit))
+  (begin (define mytime
+           (c-lambda () unsigned-long
+             "___return(time(NULL));"))))
+-----
+
+Compile the stub into a Unix object file (`mytime.o1`): `gsc mytime.sld`
+
+Use it from the REPL:
+
+-----
+$ gsi .
+> (import (mytime))
+> (mytime)
+1581758667
 -----
 
 
@@ -132,31 +132,6 @@ $ chibi-scheme
 "Hello world"
 -----
 
-### Gambit
-
-Create a Scheme library `hello.sld` with an FFI stub in it:
-
------
-(define-library (hello)
-  (export hello)
-  (import (gambit))
-  (begin (define hello
-           (c-lambda () nonnull-char-string
-             "___return(\"Hello world\");"))))
------
-
-Compile and link it into a Unix shared library: `gsc hello.sld`
-
-Use it from the REPL:
-
------
-$ gsi .
-> (import (hello))
-> (hello)
-"Hello world"
------
-
-
 ### CHICKEN
 
 Make sure to have the r7rs egg installed: `chicken-install r7rs`
@@ -181,5 +156,29 @@ Use it from the REPL:
 $ csi
 #;1> (import (hello))
 #;2> (hello)
+"Hello world"
+-----
+
+### Gambit
+
+Create a Scheme library `hello.sld` with an FFI stub in it:
+
+-----
+(define-library (hello)
+  (export hello)
+  (import (gambit))
+  (begin (define hello
+           (c-lambda () nonnull-char-string
+             "___return(\"Hello world\");"))))
+-----
+
+Compile and link it into a Unix shared library: `gsc hello.sld`
+
+Use it from the REPL:
+
+-----
+$ gsi .
+> (import (hello))
+> (hello)
 "Hello world"
 -----
