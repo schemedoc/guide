@@ -189,6 +189,25 @@ gsi/gsi ...
 
 ### Performance
 
+#### Parallel builds
+
+`make -j` can significantly speed up Gambit builds if you have a fast
+multi-core CPU and lots of RAM.
+
+#### Optimized single-host build
+
+`./configure --enable-single-host` generates a version of Gambit on
+which a good C compiler is able to do whole-program optimization. The
+resulting Gambit binaries can be significantly faster for
+performance-sensitive software. However, building Gambit this way
+takes a lot longer and requires more than a gigabyte of RAM.
+
+For pedestrian Scheme code there is little to no perceptible speed
+difference, so a non-single-host build is fine. Even a non-single-host
+Gambit is easily one of the fastest Scheme implementations available.
+
+Pre-packaged binaries of Gambit are generally single-host builds.
+
 #### GCC vs clang
 
 GNU's `gcc` compiler builds Gambit significantly faster than LLVM's
@@ -213,25 +232,6 @@ number). You can find the precise command name with:
 You can set the compiler used to build Gambit like so:
 
 `./configure CC=gcc-9`
-
-#### Optimized single-host build
-
-`./configure --enable-single-host` generates a version of Gambit on
-which a good C compiler is able to do whole-program optimization. The
-resulting Gambit binaries can be significantly faster for
-performance-sensitive software. However, building Gambit this way
-takes a lot longer and requires more than a gigabyte of RAM.
-
-For pedestrian Scheme code there is little to no perceptible speed
-difference, so a non-single-host build is fine. Even a non-single-host
-Gambit is easily one of the fastest Scheme implementations available.
-
-Pre-packaged binaries of Gambit are generally single-host builds.
-
-#### Parallel builds
-
-`make -j` can significantly speed up Gambit builds if you have a fast
-multi-core CPU and lots of RAM.
 
 ### Troubleshooting
 
