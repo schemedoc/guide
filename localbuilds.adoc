@@ -192,18 +192,18 @@ gsi/gsi ...
 #### GCC vs clang
 
 GNU's `gcc` compiler builds Gambit significantly faster than LLVM's
-`clang` compiler. On some operating systems, notably MacOS, the `gcc`
-command actually runs `clang` (whose command-line interface is largely
-compatible with GNU `gcc`). You can check this with `gcc --version`:
-the output should say `LLVM` if it's actually clang.
+`clang` compiler. Once Gambit has been built, there can be also
+substantial speed difference (about 2x in some cases) between the
+resulting executables.
+
+On some operating systems, notably MacOS, the `gcc` command actually
+runs `clang` (whose command-line interface is largely compatible with
+GNU `gcc`). You can check this with `gcc --version`: the output should
+say `LLVM` if it's actually clang.
 
 You can set the compiler command used to build Gambit like so:
 
 `./configure CC=gcc-9`
-
-Once Gambit has been built, there shouldn't be a substantial speed
-difference between the resulting executables. It's just the build
-itself that's slower with `clang`.
 
 #### Optimized single-host build
 
