@@ -66,6 +66,13 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.local/lib
 
 ### Troubleshooting
 
+When you first run `make` it creates the file
+`include/chibi/install.h`. The constant `sexp_default_module_path` in
+that file is seeded from the `PREFIX` you gave to `make`. If you later
+run `make` with a different `PREFIX` that `.h` file will not be
+regenerated and will have a stale library path. Even `make clean`
+won't get rid of it. The solution is `make cleaner`.
+
 ## CHICKEN
 
 |=====
