@@ -205,13 +205,12 @@ On MacOS, you can install the real GNU GCC from Homebrew with:
 
 `brew install gcc`
 
-Since the MacOS system `gcc` is Apple's `clang` wrapper, Homebrew
-installs GCC as `gcc-9` (where `9` is GCC's major version number). You
-can find the command name with:
+Homebrew installs GCC as `gcc-9` (where `9` is GCC's major version
+number). You can find the precise command name with:
 
-`brew list gcc | grep -E '/bin/gcc-[0-9]+' | xargs basename`
+`brew list gcc | grep -E '/bin/gcc-[0-9]+$' | xargs basename`
 
-You can set the compiler command used to build Gambit like so:
+You can set the compiler used to build Gambit like so:
 
 `./configure CC=gcc-9`
 
