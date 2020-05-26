@@ -31,7 +31,7 @@ prefix.
 |=====
 |*Implementation language:*|C interpreter and OS interface, Scheme libraries
 |*Version control:*|Git
-|*Build system:*|make
+|*Build system:*|GNU make
 |*Full build with bootstrap:*|2 minutes
 |*Documentation:*|doc/chibi.scrbl (Installation section)
 |=====
@@ -65,6 +65,9 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.local/lib
 -----
 
 ### Troubleshooting
+
+Chibi requires GNU `make`. On BSD systems, use `gmake` in place of
+`make`.
 
 When you first run `make` it creates the file
 `include/chibi/install.h`. The constant `sexp_default_module_path` in
