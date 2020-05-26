@@ -33,7 +33,7 @@ prefix.
 |*Version control:*|Git
 |*Build system:*|GNU make
 |*Full build with bootstrap:*|2 minutes
-|*Documentation:*|doc/chibi.scrbl (Installation section)
+|*Documentation:*|`doc/chibi.scrbl` (_Installation_ section)
 |=====
 
 -----
@@ -81,9 +81,9 @@ won't get rid of it. The solution is `make cleaner`.
 |=====
 |*Implementation language:*|Scheme, some C
 |*Version control:*|Git
-|*Build system:*|GNU Make
+|*Build system:*|GNU make
 |*Full build with bootstrap:*|7 minutes
-|*Documentation:*|README, "Bootstrapping" section
+|*Documentation:*|`README` (_Bootstrapping_ section)
 |=====
 
 The CHICKEN project occasionally publishes prerelease
@@ -133,7 +133,7 @@ LD_LIBRARY_PATH=. ./csi
 |=====
 
 Cyclone requires an installed version to bootstrap. If you haven't had
-any, get it from cyclone-bootstrap repository
+any, get it from `cyclone-bootstrap` repository
 
 -----
 git clone https://github.com/justinethier/cyclone-bootstrap.git
