@@ -1,0 +1,9 @@
+# Esoterica
+
+This is a collection of counter-intuitive or otherwise obscure trivia
+about the behavior of Scheme implementations and the interpretation of
+Scheme standards.
+
+## Different lambdas may return the same procedure
+
+`(eq? (lambda (x) x) (lambda (x) x))` can be either true of false.
