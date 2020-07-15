@@ -437,3 +437,27 @@ cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/.local .
 make
 make install
 -----
+
+## STklos
+
+|=====
+|*Implementation language:*|C and Scheme
+|*Version control:*|Git
+|*Build system:*|GNU autotools & make
+|*Full build with bootstrap:*|5 minutes
+|*Documentation:*|`HACKING.md`
+|=====
+
+-----
+git clone https://github.com/egallesio/STklos.git stklos
+cd stklos
+./configure --prefix=$HOME/.local
+make
+make install
+-----
+
+### Troubleshooting
+
+If you made changes to the Scheme code (or pulled changes from Git)
+and they are not being propagated to the final executable when you run
+`make`, try `touch lib/boot.stk`.
