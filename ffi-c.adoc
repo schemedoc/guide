@@ -1,6 +1,8 @@
 # Foreign function interface \(C)
 
 This is a guide to calling C code from Scheme.
+See https://github.com/schemedoc/ffi-cookbook[the FFI cookbook] for a
+variety of examples.
 
 ## Basic approaches
 
