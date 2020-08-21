@@ -6,7 +6,7 @@ This is a guide to calling C code from Scheme.
 
 ### Compiler has FFI, interpreter does not
 
-(Are there Schemes like this?)
+Chicken, ...
 
 ### Compiler builds FFI stubs, interpreter can use them
 
