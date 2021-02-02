@@ -61,3 +61,140 @@ over a definition works there:
 ## Applying a procedure to a circular list
 
 The R^7^RS syntax `#1=(+ 1 2 #1#)` means the same as `(+ 1 2 (+ 1 2 ( + 1 2 ...)))`.
+
+## How to write `symbol?` with `syntax-rules`
+
+We show a syntax-rule macro-predicate that can be applied to _any_
+expression and can soundly and reliably determine if that expression
+is a symbol/literal (as opposed to a pair, a vector, a literal string,
+a literal number, etc). The mere existence of such a predicate is
+surprising and counter-intuitive. For completeness and reference, we
+also show two macro-identity predicates on identifiers: id-eq?? and
+id-eqv??.
+
+It is well-known that syntax-rules are limited in expressive power.
+For example, we can easily write a low-level macro that can tell the
+literal type of its argument -- whether the argument a
+symbol/identifier, a literal string, a literal character, or a literal
+number:
+
+-----
+(define-macro (typeof x)
+  (cond
+    ((integer? x) "an integer")
+    ((symbol? x)  "a symbol/identifier")
+    ((pair? x)    "a pair")
+    ((string? x)  "a string")))
+
+(typeof "str") ==> "a string"
+(typeof xxx)   ==> "a symbol/identifier"
+-----
+
+We can write a similar discriminator with syntax-case. The syntax-case
+macro system has "guards" specifically for that purpose:
+
+-----
+(define-syntax typeof
+  (lambda (x)
+   (syntax-case x ()
+     ((typeof x) (integer? (syntax-object->datum #'x)) "an integer")
+     ((typeof x) (identifier? #'x) "an identifier")
+     ((typeof x) (pair? (syntax-object->datum #'x)) "a pair")
+     ((typeof x) (string? (syntax-object->datum #'x)) "a string"))))
+
+(typeof "str")   ==> "a string"
+(typeof 1)       ==> "an integer"
+(typeof typeof)  ==> "an identifier"
+-----
+
+The latter example runs on Petite Chez Scheme.
+
+Syntax-rules can determine the literal type of some arguments: a pair, a
+vector, an empty list, a boolean:
+
+-----
+(define-syntax typeof
+  (syntax-rules ()
+    ((typeof (x . y)) "a pair")
+    ((typeof #(x ...)) "a vector")
+    ((typeof #f)  "a boolean")
+    ((typeof #t)  "a boolean")
+    ))
+-----
+
+We can also write a syntax-rule that tests if its argument is _the_
+specific number, _the_ specific character, _the_ specific string. A
+syntax-rule cannot determine if its argument is _a_ string or _an_
+integer.
+
+For a long time I used to think that we cannot write a syntax-rule
+that tests if its argument is _a_ symbol. In particular, I wanted a
+macro-expand-time equivalent of the library function symbol?. We will
+call that macro symbol?? to avoid the confusion with the library
+function. That macro should take three arguments: any syntactic form
+plus two continuations, kt and kf. The macro symbol?? will expand to kt
+if and only if its first argument is a symbol. The macro would expand
+to kf if its argument is _anything_ other than a symbol. I believed
+such a macro symbol?? is impossible with syntax-rules -- until about a
+month ago I wrote it.
+
+-----
+(define-syntax symbol??
+  (syntax-rules ()
+    ((symbol?? (x . y) kt kf) kf)       ; It's a pair, not a symbol
+    ((symbol?? #(x ...) kt kf) kf)      ; It's a vector, not a symbol
+    ((symbol?? maybe-symbol kt kf)
+      (let-syntax
+        ((test
+           (syntax-rules ()
+             ((test maybe-symbol t f) t)
+             ((test x t f) f))))
+        (test abracadabra kt kf)))))
+-----
+
+The macro is based on the observation that if a form F is an
+identifier and a syntax-rule pattern P is anything but a literal
+identifier, then P can match F if and only if P is an identifier
+(symbol). The final form of this macro incorporates an improvement by
+Al Petrofsky.
+
+As a bonus, the following two macros, id-eq?? and id-eqv??, test the
+equivalence of identifiers. Both macros take two identifiers, and two
+continuations, kt and kf. The macros expand into kt if the two
+identifiers are equivalent. The macros expand into kf otherwise.
+
+-----
+(define-syntax id-eq??
+  (syntax-rules ()
+    ((id-eq?? id b kt kf)
+      (let-syntax
+        ((id (syntax-rules ()
+               ((id) kf)))
+         (ok (syntax-rules ()
+               ((ok) kt))))
+        (let-syntax
+          ((test (syntax-rules ()
+                   ((_ b) (id)))))
+          (test ok))))))
+
+(define-syntax id-eqv??
+  (syntax-rules ()
+    ((id-eqv?? a b kt kf)
+      (let-syntax
+        ((test (syntax-rules (a)
+              ((test a) kt)
+              ((test x) kf))))
+        (test b)))))
+-----
+
+For the macro id-eq??, two identifiers are equivalent if only if they
+have the same color, or to put it differently, are two occurrences of
+the same identifier. In other words, the two identifiers must be
+inter-changeable at macro-expand time. This is the strictest notion of
+equivalence. For a macro id-eqv??, the identifiers are equivalent if
+they refer to the same binding (or both identifiers are unbound and
+have the same spelling). Thus macro id-eqv?? can find two identifiers
+equivalent even if they have different colors. The last two test cases
+show the distinction.
+
+[From Oleg. Source: http://okmij.org/ftp/Scheme/macro-symbol-p.txt]
