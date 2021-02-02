@@ -57,3 +57,7 @@ over a definition works there:
   (defun foo ()
     x))
 -----
+
+## Applying a procedure to a circular list
+
+The R^7^RS syntax `#1=(+ 1 2 #1#)` means the same as `(+ 1 2 (+ 1 2 ( + 1 2 ...)))`.
