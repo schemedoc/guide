@@ -1,4 +1,4 @@
-# Text handling
+# Text processing
 
 This is a guide for common character and string tasks.
 
