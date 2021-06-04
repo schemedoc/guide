@@ -81,7 +81,7 @@ from each docket to go into the final language.
 |Indigo|stuff of dubious utility
 |====
 
-https://bitbucket.org/cowan/r7rs-wg1-infra/src/default/ColorDockets.md[Detailed list]
+https://github.com/johnwcowan/r7rs-work/blob/master/ColorDockets.md[Detailed list]
 
 ### Other SRFIs
 
