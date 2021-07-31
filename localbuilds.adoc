@@ -161,11 +161,21 @@ make PREFIX=$HOME/.local install
 |*Full build with bootstrap:*|30 minutes
 |=====
 
+### The bootstrap process
+
 Gambit requires a pre-built version of its `gsc` compiler in order to
-bootstrap itself. The bootstrap compiler is an executable at the root
-of its source directory by the name `gsc-boot`. If `make` does not
-find a `gsc-boot`, it looks for a `gsc` executable in `PATH` and makes
-a copy of it as `gsc-boot`.
+bootstrap itself. `gsc` is written in Scheme, then transpiled into C
+which is compiled into native executables using the system C compiler.
+The C files are committed into Gambit's Git repository so that a
+builder does not necessarily need to obtain a binary executable of
+`gsc` to build Gambit on a new computer. It's enough to obtain the
+Gambit Git repository and a C compiler.
+
+The bootstrap compiler is an executable at the root of its source
+directory by the name `gsc-boot`. If `gsc-boot` does not exist, `make`
+tries to find a suitable compiler in the history of the local git
+clone. For this reason, a shallow clone (`git clone --depth 1`) of
+Gambit generally does not work.
 
 The usual way to get Gambit going on a new machine is to first install
 the latest release version, then use that to bootstrap the latest git
