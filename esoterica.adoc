@@ -198,3 +198,15 @@ equivalent even if they have different colors. The last two test cases
 show the distinction.
 
 (From Oleg. Source: http://okmij.org/ftp/Scheme/macro-symbol-p.txt)
+
+## Where does the type-op procedure naming convention come from?
+
+E.g. `vector-ref`, `string-append`, `hash-table-keys`.
+
+John Cowan did a fair amount of research on where `<type>-<op>`
+procedure names were born. It is definitely earlier than R2RS; going
+through the
+https://groups.csail.mit.edu/mac/projects/scheme/rrrs-archive.html[`rrrs-authors`
+mailing list archive] shows that `vector-ref` is already in the
+earliest draft. At that time, MIT Scheme was already in version 7, so
+the evidence may be there.
