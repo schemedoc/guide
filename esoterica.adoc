@@ -12,6 +12,7 @@ Scheme standards.
 
 This procedure works as expected:
 
+[source,scheme]
 -----
 (define (foo)
   (let ((x 1))
@@ -20,6 +21,7 @@ This procedure works as expected:
 
 Hoisting the `let` outside the `define`, the code no longer compiles:
 
+[source,scheme]
 -----
 (let ((x 1))
   (define (foo)
@@ -33,6 +35,7 @@ contain only definitions.
 Compare with `lambda` which does not deal with definitions, so
 hoisting a `let` over a `lambda` works fine:
 
+[source,scheme]
 -----
 (define foo
   (lambda ()
@@ -48,6 +51,7 @@ hoisting a `let` over a `lambda` works fine:
 Common Lisp does not support inner definitions, so hoisting a `let`
 over a definition works there:
 
+[source,scheme]
 -----
 (defun foo ()
   (let ((x 1))
@@ -78,6 +82,7 @@ literal type of its argument -- whether the argument a
 symbol/identifier, a literal string, a literal character, or a literal
 number:
 
+[source,scheme]
 -----
 (define-macro (typeof x)
   (cond
@@ -93,6 +98,7 @@ number:
 We can write a similar discriminator with syntax-case. The syntax-case
 macro system has "guards" specifically for that purpose:
 
+[source,scheme]
 -----
 (define-syntax typeof
   (lambda (x)
@@ -112,6 +118,7 @@ The latter example runs on Petite Chez Scheme.
 Syntax-rules can determine the literal type of some arguments: a pair, a
 vector, an empty list, a boolean:
 
+[source,scheme]
 -----
 (define-syntax typeof
   (syntax-rules ()
@@ -138,6 +145,7 @@ to kf if its argument is _anything_ other than a symbol. I believed
 such a macro symbol?? is impossible with syntax-rules -- until about a
 month ago I wrote it.
 
+[source,scheme]
 -----
 (define-syntax symbol??
   (syntax-rules ()
@@ -163,6 +171,7 @@ equivalence of identifiers. Both macros take two identifiers, and two
 continuations, kt and kf. The macros expand into kt if the two
 identifiers are equivalent. The macros expand into kf otherwise.
 
+[source,scheme]
 -----
 (define-syntax id-eq??
   (syntax-rules ()
