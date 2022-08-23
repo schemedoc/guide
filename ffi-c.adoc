@@ -1,31 +1,17 @@
-# Foreign function interface \(C)
+= Foreign function interface \(C)
 
 This is a guide to calling C code from Scheme.
 See https://github.com/schemedoc/ffi-cookbook[the FFI cookbook] for a
 variety of examples.
 
-## Basic approaches
-
-### Compiler has FFI, interpreter does not
-
-Chicken, ...
-
-### Compiler builds FFI stubs, interpreter can use them
-
-Gambit, ...
-
-### FFI stubs can be generated from the REPL
-
-Chez Scheme, ...
-
-## Get the current time from libc
+== Get the current time from libc
 
 This is about the simplest possible example. `time(NULL)` is a
 well-known way to get the current time in C. The time is returned as
 the number of seconds elapsed since the epoch (on Unix, midnight,
 January 1st, 1970).
 
-### Chez Scheme
+=== Chez Scheme
 
 From the REPL:
 
@@ -36,12 +22,13 @@ From the REPL:
 1581759013
 -----
 
-### CHICKEN
+=== CHICKEN
 
 Make sure to have the r7rs egg installed: `chicken-install r7rs`
 
 Create a Scheme library `mytime.sld` with an FFI stub in it:
 
+[source,scheme]
 -----
 (define-library (mytime)
   (export mytime)
@@ -64,10 +51,11 @@ $ csi
 1589710285
 -----
 
-### Gambit
+=== Gambit
 
 Create a Scheme library `mytime.sld` with an FFI stub in it:
 
+[source,scheme]
 -----
 (define-library (mytime)
   (export mytime)
@@ -89,12 +77,13 @@ $ gsi .
 -----
 
 
-## Return a string from C
+== Return a string from C
 
-### Chibi-Scheme
+=== Chibi-Scheme
 
 Create the Scheme library file `hello.sld`:
 
+[source,scheme]
 -----
 (define-library (hello)
   (export hello)
@@ -134,12 +123,13 @@ $ chibi-scheme
 "Hello world"
 -----
 
-### CHICKEN
+=== CHICKEN
 
 Make sure to have the r7rs egg installed: `chicken-install r7rs`
 
 Create a Scheme library `hello.sld` with an FFI stub in it:
 
+[source,scheme]
 -----
 (define-library (hello)
   (export hello)
@@ -161,10 +151,11 @@ $ csi
 "Hello world"
 -----
 
-### Gambit
+=== Gambit
 
 Create a Scheme library `hello.sld` with an FFI stub in it:
 
+[source,scheme]
 -----
 (define-library (hello)
   (export hello)
