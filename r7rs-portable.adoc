@@ -1,0 +1,344 @@
+= R7RS: Portable Guide
+
+R7RS is the current standard. The language has been divided into 
+two parts.
+
+R7RS-small:: defines the core language, and extends the earlier R5RS standard
+with exception handling, libraries and records, amongst other additions.
+The R7RS report can be found under the https://standards.scheme.org/[standards]
+menu. 
+
+R7RS-large:: is still under development, and aims to define a set of libraries
+"focused on the practical needs of mainstream software development." R7RS-large
+is being developed in dockets, each docket known by a color and focusing on a
+different set of libraries - for example, the Red docket mostly contains data
+structures.  Information on the progress and planned future of R7RS-large is
+available at
+https://github.com/johnwcowan/r7rs-work/blob/master/R7RSHomePage.md
+
+
+== Implementation Support
+
+The following table shows any command-line flags required to put the Scheme 
+implementation into R7RS mode.
+
+[cols="1a,2a"]
+|=====
+| Implementation | R7RS Mode Flags
+
+|Chibi-Scheme 
+|`chibi-scheme` (R7RS mode is the default)
+
+|Chicken 
+|`csc -R r7rs` and `csi -R r7rs`
+
+|Cyclone 
+|`cyclone` and `icyc` (R7RS mode is the default)
+
+|Gambit 
+|`gsc -:r7rs` and `gsi -:r7rs`
+
+|Gauche 
+|`gosh -r 7`
+
+|Gerbil 
+|`gxi --lang r7rs`
+
+|Guile 
+|`guile --r7rs`
+
+|Kawa 
+|`kawa --r7rs`
+
+|Larceny 
+|`larceny -r7rs`
+
+|Sagittarius 
+|`sagittarius -r 7` and `sash -r 7`
+
+|=====
+
+The levels of R7RS-large support vary. Gauche and Sagittarius
+support all of the Red and Tangerine dockets, with the new R7RS-large names
+(see
+https://practical-scheme.net/gauche/man/gauche-refe/R7RS-large.html#R7RS-large[Gauche]
+and http://ktakashi.github.io/sagittarius-ref.html#G2104[Sagittarius] manuals).
+Most implementations do, however, support many of the required SRFIs:
+SRFI support is documented at https://docs.scheme.org/srfi/support/[].
+
+== R7RS Large Edition
+
+The following series of tables give a summary of the libraries covered by the
+Red and Tangerine dockets (arranged into groups of related functionality) and
+the Yellow docket. The second column links to some documentation for each
+library: most of these libraries are based on existing SRFIs and, for
+portability, it is recommended to use the SRFI imports to get at these
+libraries.
+
+=== Formatting
+
+This library provides a scheme-like way of formatting text by constructing
+s-expressions, as opposed to using text interpolation. (Note: the Tangerine
+Edition refers to SRFI 159, but that has been _withdrawn_ in favour of SRFI
+166.)
+
+[cols="1,1,5"]
+|===
+| R7RS Name | Documentation | Description
+
+| `(scheme show)` 
+| http://srfi.schemers.org/srfi-159/srfi-159.html[(srfi 159)] 
+| Formatting text.
+|===
+
+=== Regular Expressions
+
+This library, like `show`, provides a scheme-like way of describing regular
+expressions using s-expressions.
+
+[cols="1,1,5"]
+|===
+| R7RS Name | Documentation | Description
+
+| `(scheme regex)` 
+| https://srfi.schemers.org/srfi-115/srfi-115.html[(srfi 115)]
+| Regular expressions.
+|===
+
+=== Data Types
+
+Text:: This library introduces an immutable form of a string, called a `text`.
+The rationale for this library is that more efficient operations can be
+implemented for strings which are immutable, particularly if they are
+unicode-encoded.  Helpfully, many of the implemented operations work on
+"textual" objects, which includes both the new immutable `text` data type and
+regular `string` values.
+
+[cols="1,1,5"]
+|===
+| R7RS Name | Documentation | Description
+
+| `(scheme text)` 
+| https://srfi.schemers.org/srfi-135/srfi-135.html[(srfi 135)]
+| Immutable strings.
+|===
+
+Numbers:: These libraries provide additional functionality and potentially
+efficient implementations for working with numbers. 
+
+[cols="1,1,5"]
+|===
+| R7RS Name | Documentation | Description
+
+| `(scheme division)` 
+| https://srfi.schemers.org/srfi-141/srfi-141.html[(srfi 141)]
+| Provides six different ways of computing the quotient and remainder (`q` and `r`) when dividing an integer `n` so that `n = dq+r`.
+
+| `(scheme bitwise)` 
+| https://srfi.schemers.org/srfi-151/srfi-151.html[(srfi 151)]
+| Treats integers as twos-complement numbers, and provides a complete set of operators for manipulating integers in bitwise form.
+
+| `(scheme fixnum)` 
+| https://srfi.schemers.org/srfi-143/srfi-143.html[(srfi 143)]
+| Provides efficient implementations of operations on integers which are "small enough" to be treated within a single machine word.
+
+| `(scheme flonum)` 
+| https://srfi.schemers.org/srfi-144/srfi-144.html[(srfi 144)]
+| Provides efficient implementations of operations on flonums, a subset of the full range of inexact real numbers. 
+|===
+
+=== Data Structures
+
+Data structures (collections) have been a major focus of R7RS-large
+development.  The small language has built-in the list and vector datatypes, a
+specialisation of vector to bytevectors, and a simple mapping pattern in the
+form of association lists.
+
+Set-like:: Designed to hold one or more values without any additional
+structure, such as order, imposed on them. Set-like structures may enforce
+unique values (sets) or permit multiple values (bags, or multi-sets).
+
+[cols="1,1,5"]
+|===
+| R7RS Name | Documentation | Description
+
+| `(scheme box)` 
+| https://srfi.schemers.org/srfi-111/srfi-111.html[(srfi 111)]
+| Provides a single-item container.
+
+| `(scheme set)` 
+| https://srfi.schemers.org/srfi-113/srfi-113.html[(srfi 113)]
+| Provides both `set` and `bag` data structures, along with a wide-range of supporting functions.
+
+| `(scheme charset)` 
+| https://srfi.schemers.org/srfi-14/srfi-14.html[(srfi 14)]
+| Deals specifically with sets of characters, making available some predefined character sets, and operations to work with such sets.
+|===
+
+List-like:: Designed to hold one or more values in a specific order. Values can
+be duplicated within the data structure.
+
+[cols="1,1,5"]
+|===
+| R7RS Name | Documentation | Description
+
+| `(scheme list)` 
+| https://srfi.schemers.org/srfi-1/srfi-1.html[(srfi 1)]
+| Provides a wide-range of functions working with the built-in list datatype.
+
+| `(scheme ilist)` 
+| https://srfi.schemers.org/srfi-116/srfi-116.html[(srfi 116)]
+| Provides an immutable version of the built-in `list` along with functions equivalent to those in the `list` library, where appropriate.
+
+| `(scheme rlist)` 
+| https://srfi.schemers.org/srfi-101/srfi-101.html[(srfi 101)]
+| An alternative to the built-in `list`, but offers more efficient references (`rlist-ref` is O(log n)) and a functional interface.  Note that, unlike the SRFI, the R7RS-large version prefixes identifiers with "r" to avoid name-clashes with `list`.
+
+| `(scheme ideque)` 
+| https://srfi.schemers.org/srfi-134/srfi-134.html[(srfi 134)]
+| Provides an immutable deque data struture, a double-ended queue which supports efficient (O(1)) adding/removal of items from either end.
+
+| `(scheme list-queue)` 
+| https://srfi.schemers.org/srfi-117/srfi-117.html[(srfi 117)]
+| A mutable deque data structure, which offers efficient adding/removal of items from the front and adding of items to the back.
+|===
+
+Vectors are a variant of lists, which hold values in a specific order and
+provide O(1) look-up time using a numeric index. The different types allow for
+specialisation in terms of the particular contents. 
+
+[cols="1,1,5"]
+|===
+| R7RS Name | Documentation | Description
+
+| `(scheme vector)`
+| https://srfi.schemers.org/srfi-133/srfi-133.html[(srfi 133)]
+| Provides a wide-range of functions working with the built-in vector datatype.
+
+| `(scheme bytevector)` 
+| http://www.r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-3.html#node_chap_2[(rnrs bytevectors)]
+| Taken from R6RS.
+
+| `(scheme vector @)` 
+| https://srfi.schemers.org/srfi-160/srfi-160.html[(srfi 160)]
+| Provide homogeneous equivalents to the `vector` type and library for specific numeric types; these can potentially be implemented more efficiently than the general form.
+|===
+
+Map-like:: Collections of key-value pairs, where a key is used to retrieve a
+value stored within the collection. They can be thought of as a generalisation
+of the vector, except that any type of value can be used as the index, not just
+a number.
+
+[cols="1,1,5"]
+|===
+| R7RS Name | Documentation | Description
+
+| `(scheme hash-table)` 
+| https://srfi.schemers.org/srfi-125/srfi-125.html[(srfi 125)]
+| Provides a standard hash table data structure.
+
+| `(scheme mapping)` 
+| https://srfi.schemers.org/srfi-146/srfi-146.html[(srfi 146)]
+| Provides a more general data structure than `hash-table`, supporting functional procedures.
+|===
+
+Stream-like:: These data structures do not store _existing_ values, but instead
+_construct_ new values on demand. 
+
+[cols="1,1,5"]
+|===
+| `(scheme generator)` 
+| https://srfi.schemers.org/srfi-158/srfi-158.html[(srfi 158)]
+| Provides both "generators" and "accumulators". A generator is a zero-argument procedure that acts as a source of values; an accumulator is a single-argument procedure that acts as a sink of values.
+
+| `(scheme lseq)` 
+| https://srfi.schemers.org/srfi-127/srfi-127.html[(srfi 127)]
+| A list where the "cdr" element is a generator; this is similar to `stream` except that the lists are _odd_, so the first element is eager evaluated.
+
+| `(scheme stream)` 
+| https://srfi.schemers.org/srfi-41/srfi-41.html[(srfi 41)]
+| Provides low-level and higher-level support for lazy lists; lists where each item is constructed on demand. These lists are _even_, so both elements are lazy evaluated.
+|===
+
+=== Utility
+
+These libraries are used to support data structures.
+
+[cols="1,1,5"]
+|===
+| R7RS Name | Documentation | Description
+
+| `(scheme comparator)` 
+| https://srfi.schemers.org/srfi-128/srfi-128.html[(srfi 128)]
+| Bundles together the equality, comparison and hash functions for different data-types, so they can be used in the construction of a data structure for a specific type of data. This library is used in: `hash-table`, `mapping`, and `set`.
+
+| `(scheme ephemeron)` 
+| https://srfi.schemers.org/srfi-124/srfi-124.html[(srfi 124)]
+| Can be used to implement data structures with weak references, which permit garbage collection.
+
+| `(scheme sort)` 
+| https://srfi.schemers.org/srfi-132/srfi-132.html[(srfi 132)]
+| A collection of sort, merge and related functions, working on the built-in list and vector datatypes.
+|===
+
+=== Yellow Edition (macros)
+
+This edition appears to have been
+https://docs.google.com/forms/d/1FEovNGbLYWz2yd6-UrbSCjFwAQ6fynrStLQyyC6YYDE/viewanalytics[voted
+on], but there are not many details available yet, e.g. what the `(scheme
+NAME)` names will be. Here is a list of what might be expected:
+
+[cols="1,1,5"]
+|===
+| R7RS Name | Documentation | Description
+
+| | http://www.r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html[syntax-case] | From R6RS
+| | http://www.r6rs.org/final/html/r6rs/r6rs-Z-H-14.html#node_idx_796[identifier-syntax] | From R6RS
+| | https://srfi.schemers.org/srfi-139/srfi-139.html[(srfi 139)] | Syntax parameters
+| | https://srfi.schemers.org/srfi-188/srfi-188.html[(srfi 188)] | Splicing binding constructs for syntactic keywords
+| | https://srfi.schemers.org/srfi-212/srfi-212.html[(srfi 212)] | Aliases
+| | https://srfi.schemers.org/srfi-213/srfi-213.html[(srfi 213)] | Identifier properties
+| | https://srfi.schemers.org/srfi-61/srfi-61.html[(srfi 61)] | A more general cond clause
+| | https://srfi.schemers.org/srfi-8/srfi-8.html[(srfi 8)] | receive: Binding to multiple values
+| | https://srfi.schemers.org/srfi-31/srfi-31.html[(srfi 31)] | A special form rec for recursive evaluation
+| | https://srfi.schemers.org/srfi-26/srfi-26.html[(srfi 26)] | Notation for specializing parameters without currying
+| | https://srfi.schemers.org/srfi-219/srfi-219.html[(srfi 219)] | Define higher-order lambda
+| | https://srfi.schemers.org/srfi-210/srfi-210.html[(srfi 210)] | Procedures and syntax for multiple values
+|===
+
+== R7RS Large Edition dockets
+
+R7RS-large is developed by assigning candidate SRFIs to *color dockets* that
+concern different aspects of the language. Over time, the language working
+group (WG2) selects the most appropriate SRFIs from each docket to go into the
+final language.
+
+[cols="1a,2a"]
+|====
+|Docket|Concerns
+
+|Red|data structures
+|Tangerine|numerics
+|Orange|numerics
+|Amber|syntax
+|Yellow|syntax
+|Lime|portable
+|Green|non-portable
+|Olive|non-portable
+|Aqua|portable but complex things
+|Blue|portable but advanced things
+|Indigo|stuff of dubious utility
+|====
+
+https://github.com/johnwcowan/r7rs-work/blob/master/ColorDockets.md[Detailed list]
+
+== Other SRFIs
+
+The following SRFIs are the most widely supported ones for tasks that
+R7RS-large is not currently planned to cover:
+
+[cols="1a,2a"]
+|=====
+|*Task*|*SRFI import*
+|Environment variables|`(srfi 98)`
+|=====
