@@ -1,4 +1,4 @@
-= Portable: R6RS 
+= R6RS: Portability Pitfalls
 
 Here are some common pitfalls when writing R6RS code that creates problems when moving between Schemes.
 
