@@ -1,0 +1,360 @@
+= Foreign function interface (Java)
+
+This is a guide to calling Java and other JVM languages from Scheme.
+
+The most important Scheme implementation running on the JVM is https://www.gnu.org/software/kawa[Kawa].
+Created by Per Bothner, this implementation has been continuously developed and maintained for over 25 years. 
+It implements several related languages/features, but importantly covers R7RS-small. The only restriction is that:
+
+* tail-call optimisation is a compile-time flag, and usually off
+
+http://jscheme.sourceforge.net/[JScheme] and http://www.sisc-scheme.org/[SISC] are two alternative versions 
+of Scheme running on the JVM, which can still be used today. But this guide will focus on Kawa.
+
+(For brevity, anything specific to Java or related libraries are not explained here: this guide is to help 
+the Java programmer use Kawa.)
+
+== Basic Steps
+
+=== Calling static methods
+
+Let's take a look at "hello world", the equivalent of Java's:
+
+[source,java]
+----
+public class HelloWorld {
+  public static void main (String[] args) {
+    System.out.println ("Hello from Java!");
+  }
+}
+----
+
+Put the following into a file, call it "hello.scm":
+
+[source,scheme]
+----
+(java.lang.System:out:println "Hello from Kawa")
+----
+
+Run it using:
+
+----
+$ kawa hello.scm
+----
+
+We can also evaluate this in the REPL:
+
+----
+$ kawa
+#|kawa:1|# (java.lang.System:out:println "Hello from Kawa")
+Hello from Kawa
+----
+
+Notice the call to the Java method: package name ("java.lang"), class name ("System"), static field ("out") and then static method ("println").
+
+The colons between the class name, its static field, and the method on the value
+in that field, are examples of Kawa's
+https://www.gnu.org/software/kawa/Colon-notation.html[Colon notation], used to
+access parts of values.
+
+As with Java, we can import classes to save typing their full package name:
+
+----
+#|kawa:3|# (import (class java.lang System))
+#|kawa:4|# (System:out:println "hi")
+hi
+----
+
+Alternatively, we can give our own names to things using https://www.gnu.org/software/kawa/Locations.html#idm45230717976176[define-alias]:
+
+----
+#|kawa:5|# (define-alias jlMath java.lang.Math)
+#|kawa:6|# (jlMath:sqrt 10.0)
+3.1622776601683795
+----
+
+=== Creating an instance
+
+Creating an instance of a given class is achieved by calling that class as if
+it were a procedure.  In the following example, we create an `ArrayList`, add
+some values and display the values.  Kawa displays a warning about "no known
+slots" - try to ignore these!
+
+----
+#|kawa:9|# (import (class java.util ArrayList))
+#|kawa:10|# (define al (ArrayList))
+#|kawa:11|# al
+#()
+#|kawa:12|# (al:add 1)
+/dev/tty:12:2: warning - no known slot 'add' in java.lang.Object
+#t
+#|kawa:13|# al
+#(1)
+#|kawa:14|# (al:add 2)
+/dev/tty:14:2: warning - no known slot 'add' in java.lang.Object
+#t
+#|kawa:15|# al
+#(1 2)
+#|kawa:16|# (al:size)
+/dev/tty:16:2: warning - no known slot 'size' in java.lang.Object
+2
+----
+
+Kawa has a nice trick with Java lists and arrays: `for-each` works across them!
+
+----
+#|kawa:18|# (for-each (lambda (i) (display " - ") (display i) (newline)) al)
+ - 1
+ - 2
+----
+
+=== Further Documentation
+
+There is a lot more to explore with Kawa and its access to the JVM. Further
+documentation is available on the https://www.gnu.org/software/kawa[Kawa]
+website. Some pages directly related to Java-Scheme interaction, and the
+examples on this guide, include:
+
+* https://www.gnu.org/software/kawa/Allocating-objects.html[Allocating objects] - how to create instances of a given datatype
+* https://www.gnu.org/software/kawa/Defining-new-classes.html[Classes] - defining new classes
+* https://www.gnu.org/software/kawa/Colon-notation.html[Colon notation] - the colon notation used to access parts of values
+* https://www.gnu.org/software/kawa/Method-operations.html[Methods] - calling Java methods from Scheme
+* https://www.gnu.org/software/kawa/Sequences.html[Sequences] - different sequence types in Kawa
+
+== Larger Example
+
+The following example demonstrates a more meaningful task in data analysis. It
+uses two Apache Commons libraries,
+https://commons.apache.org/proper/commons-csv/[CSV] and
+https://commons.apache.org/proper/commons-math/[Math], to read a CSV file,
+generate some statistics, and cluster the data. 
+
+=== Step 1: Download required files
+
+The example used here is the Iris dataset from the UCI database: 
+https://archive-beta.ics.uci.edu/ml/datasets/iris[download] iris.data.
+
+This dataset has four attributes and a label, stored within a CSV file. The first
+few records are:
+
+----
+5.1,3.5,1.4,0.2,Iris-setosa
+4.9,3.0,1.4,0.2,Iris-setosa
+4.7,3.2,1.3,0.2,Iris-setosa
+4.6,3.1,1.5,0.2,Iris-setosa
+...
+----
+
+Download the CSV and Math libraries from the above links: the jar file names
+and versions used here are `commons-csv-1.9.0.jar` and `commons-math3-3.6.1.jar`.
+
+=== Step 2: Import required classes
+
+The required Java classes must be imported into the script:
+
+[source,scheme]
+----
+(import (class java.io
+               BufferedReader FileReader)
+        (class org.apache.commons.csv 
+               CSVFormat)
+        (class org.apache.commons.math3.stat.descriptive
+               DescriptiveStatistics)
+        (class org.apache.commons.math3.ml.clustering
+               Clusterable KMeansPlusPlusClusterer))
+----
+
+=== Step 3: Reading in the CSV file
+
+The most complex step is reading in the data and converting it into a list of
+objects: each row of the dataset will be represented as an instance of a class,
+`IrisInstance`.  When we use the clustering algorithm, we will need to pass it
+data which implements the `Clusterable` interface, which provides a `getPoint`
+method returning the data features as a `double[]`.
+
+The class definition is:
+
+[source,scheme]
+----
+(define-simple-class IrisInstance (Clusterable)
+                     (sepal-length)
+                     (sepal-width)
+                     (petal-length)
+                     (petal-width)
+                     (label)
+                     (point)
+                     ((getPoint) 
+                      point))
+----
+
+This defines a class called `IrisInstance` which implements the `Clusterable`
+interface.  It has six fields: `sepal-length`, `sepal-width`, ... `point`. And
+one method, `getPoint`, which returns the value of `point`. 
+
+The conversion from a `CSVRecord` instance to an `IrisInstance` is made in the
+following procedure:
+
+[source,scheme]
+----
+(define (csvrecord->iris-instance record)
+  (if (= (record:size) 5)
+      (let ((sepal-length (string->number (record:get 0)))
+            (sepal-width (string->number (record:get 1)))
+            (petal-length (string->number (record:get 2)))
+            (petal-width (string->number (record:get 3))))
+        (if (and (number? sepal-length)
+                 (number? sepal-width)
+                 (number? petal-length)
+                 (number? petal-width))
+            (make IrisInstance
+                  sepal-length: sepal-length
+                  sepal-width: sepal-width
+                  petal-length: petal-length 
+                  petal-width: petal-width
+                  label: (record:get 4)
+                  point: (double[] sepal-length sepal-width petal-length petal-width))
+            ())) ; return empty list if first four entries are not numbers
+      ())) ; return empty list if record is not of correct size
+----
+
+This procedure performs some safety checks - that the record is of the right
+size, and its values are numbers, before creating an instance of `IrisInstance`
+with values for each of the given fields. Notice how `point` is initialised
+with a `double[]` value - this is to meet the requirements of the `Clusterable`
+interface.
+
+The following procedure reads the Iris dataset from the given filename, and
+returns a list of `IrisInstance` values:
+
+[source,scheme]
+----
+(define (read-data filename)
+  (with-exception-handler
+    (lambda (exn)
+      (display "Error: in reading data from ") (display filename) (newline)
+      (display exn)
+      (java.lang.System:exit -1))
+    (lambda ()
+      (let* ((input-reader (BufferedReader (FileReader filename)))
+             (records ((CSVFormat:RFC4180:parse input-reader):iterator)))
+        (let loop ((result '()))
+          (if (records:hasNext)
+              (let ((item (csvrecord->iris-instance (records:next))))
+                (loop (if (null? item) ; ignore empty list
+                          result
+                          (cons item result))))
+              (reverse result)))))))
+----
+
+An exception handler is used to catch any file-reading errors and exit gracefully.
+
+The main body of the procedure opens a CSV reader using a combination of Java's
+builtin `BufferedReader` and the CSV library's `CSVFormat` class: the `records`
+value is a Java iterator. A loop then iterates over `records`, converting each
+record into an `IrisInstance`, and storing valid values into a list.
+
+=== Step 4: Displaying quantitative statistics
+
+The `DescriptiveStatistics` class is very useful for creating quantitative 
+statistics: using an accessor function (to retrieve a required field), we 
+can create a procedure to build an instance of this class for the different 
+fields in our dataset:
+
+[source,scheme]
+----
+(define (statistics dataset accessor-fn)
+  (let ((ds (DescriptiveStatistics)))
+    (for-each (lambda (instance)
+                (ds:addValue (accessor-fn instance)))
+              dataset)
+    ds))
+----
+
+Information about the data values can then be retrieved directly from the
+`DescriptiveStatistics` instance:
+
+[source,scheme]
+----
+(define (display-statistics name ds)
+  (display name) (newline)
+  (display "-- minimum: ") (display (ds:getMin)) (newline)
+  (display "-- maximum: ") (display (ds:getMax)) (newline)
+  (display "-- mean:    ") (display (ds:getMean)) (newline)
+  (display "-- stddev:  ") (display (ds:getStandardDeviation)) (newline))
+----
+
+Given the above, we can now read in the dataset and display information about each component
+of the data:
+
+[source,scheme]
+----
+(define dataset (read-data "iris.data"))
+
+(display "Size of dataset: ") (display (length dataset)) (newline)
+
+(display-statistics "Sepal length" (statistics dataset (lambda (instance) instance:sepal-length)))
+(display-statistics "Sepal width" (statistics dataset (lambda (instance) instance:sepal-width)))
+(display-statistics "Petal length" (statistics dataset (lambda (instance) instance:petal-length)))
+(display-statistics "Petal width" (statistics dataset (lambda (instance) instance:petal-width)))
+----
+
+=== Step 5: Clustering the data
+
+Building a data model is now fairly straightforward, as our dataset is in the
+appropriate form.  The following code builds the clusters and then uses an
+iterator on the clusters to print information about each cluster:
+
+[source,scheme]
+----
+(let* ((model (KMeansPlusPlusClusterer 3))
+       (clusters (model:cluster dataset))
+       (iterator (clusters:iterator)))
+  (let loop ()
+    (if (iterator:hasNext)
+        (let ((cluster (iterator:next)))
+          (display "Cluster: ") (display ((cluster:getCenter):getPoint)) (newline)
+          (display "Cluster has: ") (display ((cluster:getPoints):size)) (display " points") (newline)
+          (loop)))))
+----
+
+=== Step 6: Run the script
+
+The above code should be copied, in order, into a file "csv-kawa.scm".
+
+The script is run as follows (on Windows - the classpath needs changing on Linux/Mac), including the libraries. 
+Notice the `--no-warn-unknown-member` flag - this makes Kawa output a bit quieter. 
+
+----
+> java -cp "kawa.jar;commons-csv-1.9.0.jar;commons-math3-3.6.1.jar" kawa.repl --no-warn-unknown-member .\csv-kawa.scm
+Size of dataset: 150
+Sepal length
+-- minimum: 4.3
+-- maximum: 7.9
+-- mean:    5.843333333333334
+-- stddev:  0.8280661279778628
+Sepal width
+-- minimum: 2.0
+-- maximum: 4.4
+-- mean:    3.054
+-- stddev:  0.43359431136217386
+Petal length
+-- minimum: 1.0
+-- maximum: 6.9
+-- mean:    3.758666666666666
+-- stddev:  1.7644204199522626
+Petal width
+-- minimum: 0.1
+-- maximum: 2.5
+-- mean:    1.1986666666666665
+-- stddev:  0.763160741700841
+Cluster: [5.005999999999999 3.4180000000000006 1.464 0.2439999999999999]
+Cluster has: 50 points
+Cluster: [6.853846153846153 3.0769230769230766 5.715384615384615
+          2.053846153846153]
+Cluster has: 39 points
+Cluster: [5.88360655737705 2.740983606557377 4.388524590163935
+          1.4344262295081966]
+Cluster has: 61 points
+----
+
+
