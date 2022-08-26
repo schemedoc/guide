@@ -1,0 +1,304 @@
+= Multiple Values
+
+"At its core, Scheme's evaluation semantics is multiple-value based. Continuations can accept an arbitrary number of values and expressions can yield an arbitrary number of values. This is in contrast to the functional languages ML and Haskell."
+-- Marc Nieper-Wi&#x00df;kirchen, SRFI 210
+
+What are "multiple values"? As the name suggests, they are representations of
+more than one value - but they are bound together. This binding is _not_ the
+same as some kind of data structure, like a `list`. The procedure `values`
+is used to create a set of multiple values from the individual values 1 and 2:
+
+[source,scheme]
+----
+gosh$ (values 1 2)
+1
+2
+----
+
+As a more useful example, `(scheme base)` in R7RS contains the procedure
+`exact-integer-sqrt`. The definition for this states: "Returns two non-negative
+exact integers s and r". 
+
+[source,scheme]
+----
+gosh$ (exact-integer-sqrt 16)
+4
+0
+gosh$ (exact-integer-sqrt 17)
+4
+1
+----
+
+As the procedure has not returned a single value, we cannot simply use the
+result.  So, what can we do with multiple values? And, how can we get and use
+_all_ of the returned values? 
+
+Support for multiple values has grown with successive versions of the Scheme standard:
+
+* R5RS introduced multiple-value returns, supported with the `values`
+and `call-with-values` syntax.
+* R6RS added the `let-values` and `let*-values` forms, previously defined in 
+https://srfi.schemers.org/srfi-11/srfi-11.html[SRFI 11].
+* R7RS has added `define-values`.
+
+R7RS-small contains the following five constructs dealing with multiple values:
+
+* `call-with-values` - used to pass values returned from a _producer_ procedure to a _consumer_ 
+
+* `define-values` -  used like `define`, but binds values to identifiers
+
+* `let-values` - used like `let`, but binds values to identifiers
+
+* `let*-values` - used like `let*`, but binds values to identifiers with an environment covering the previous bindings
+
+* `values` - bundles its arguments together as a set of values
+
+Given a procedure which returns multiple values, we can get and use 
+_all_ of the returned values by using the `define-` and `let-` forms.
+
+`define-values` works like `define` but matches up a series of identifiers
+with the respective returned value:
+
+[source,scheme]
+----
+gosh$ (define-values (root remainder) (exact-integer-sqrt 17))
+remainder
+gosh$ root
+4
+gosh$ remainder
+1
+----
+
+As `define-values` is matching a list of formals (like `lambda`), it is easy to
+get values as lists, do simple pattern matching, etc:
+
+[source,scheme]
+----
+gosh$ (define-values vals (values 1 2 3))
+vals
+gosh$ vals
+(1 2 3)
+gosh$ (list? vals)
+#t
+gosh$ (define-values (head . rest) (values 1 2 3))
+rest
+gosh$ head
+1
+gosh$ rest
+(2 3)
+----
+
+There are no surprises with `let-values` and `let*-values`: these work
+in the same way as `let` and `let*`, but use multiple identifiers to 
+match multiple values:
+
+[source,scheme]
+----
+(define (find-roots x y)
+  (let-values (((x-root x-remainder) (exact-integer-sqrt x))
+               ((y-root y-remainder) (exact-integer-sqrt y))) 
+    (list x-root y-root)))
+----
+
+Notice how the `(x-root x-remainder)` pattern collects and names the two returned values from `exact-integer-sqrt`.)
+
+[source,scheme]
+----
+(define (roots+total-remainder x y)
+ (let*-values (((x-root x-remainder) (exact-integer-sqrt x))
+               ((y-root y-remainder) (exact-integer-sqrt y))
+               ((roots total-remainder) 
+                (values (list x-root y-root)
+                        (+ x-remainder y-remainder))))
+    (list roots total-remainder)))
+----
+
+And here, we are using a `let*-` form, so we can access the previous definitions to create totals.
+
+The remaining form, `call-with-values`, ties together the production and
+consumption of multiple values: a _producer_ is a zero-argument procedure that
+returns multiple values, using a `values` expression, and a _consumer_ is a
+procedure that accepts these values as its arguments.
+
+Notice the little "gotcha" that the _producer_ must be a zero-argument 
+procedure.
+
+[source,scheme]
+----
+(define (show-root n)
+  (call-with-values 
+    (lambda () (exact-integer-sqrt n)) ; producer procedure
+    (lambda (s r) (display (square s)) ; consumer procedure
+                  (display " + ") 
+                  (display r) (newline))))
+
+gosh$ (show-root 15)
+9 + 6
+----
+
+Here, the _producer_ procedure, returns two values, and the _consumer_
+procedure accepts those two values as its arguments.
+
+
+== SRFI extensions
+
+Two SRFIs, https://srfi.schemers.org/srfi-8/srfi-8.html[SRFI 8] and
+https://srfi.schemers.org/srfi-210/srfi-210.html[SRFI 210], are particularly
+targetted at multiple values: these have both been accepted into the Yellow
+Edition of R7RS-large.
+
+=== SRFI 8: Binding to multiple values
+
+This SRFI appears in several other SRFIs, its short definition often
+copy-pasted into the reference implementation of other libraries.
+
+The SRFI provides the `receive` syntax, to improve on `call-with-values`.
+Specifically, instead of having a zero-argument procedure as producer, 
+`receive` accepts any expression as a producer, and its values are bound 
+into a set of provided identifiers. These can then be processed within 
+the expression's body.
+
+The `show-root` example above can be rewritten to use `receive` as:
+
+[source,scheme]
+----
+(define (show-root n)
+  (receive (s r) (exact-integer-sqrt n)           ; <1>
+    (display (square s))                          ; <2>
+    (display " + ") 
+    (display r) (newline)))
+----
+<1> The multiple-return values are captured into the given identifiers.
+<2> The body can work with those identifiers.
+
+Of course, in a post-R5RS world, we have `let-values` as an alternative,
+which also has the advantage of being able to "receive" values from 
+multiple producers. The above example using `let-values`:
+
+[source,scheme]
+----
+(define (show-root n)
+  (let-values (((s r) (exact-integer-sqrt n)))    ; <1>
+    (display (square s))                          ; <2>
+    (display " + ") 
+    (display r) (newline)))
+----
+<1> The multiple-return values are captured into the given identifiers.
+<2> The body can work with those identifiers.
+
+
+=== SRFI 210: Procedures and syntax for multiple values
+
+Aimed at introducing procedures and syntax for dealing with multiple values, 
+such as creating lists and vectors from expressions returning multiple values
+and procedures returning the elements of a list or vector as multiple values.
+
+This SRFI introduces a number of syntactic forms and procedures, which can be 
+divided into four groups:
+
+1. helpful operations for working with multiple values, such as `coarity`, which 
+   tells you how many values you have.
+2. operations for converting multiple values to and from other data types, 
+   such as `list/mv`, which evaluates one or more values and producer, returning
+   all the resulting values as a list.
+3. helpful operations when calling procedures with multiple values, such as 
+   `apply/mv`, which applies a procedure to a set of values, the last of which
+   can be a set of multiple values.
+4. manages groups of procedures, such as `bind/mv`, which chains a series of procedures
+   together, passing multiple values between them.
+
+We can take a look at two examples.
+
+The first example is `case-receive`, which is a kind of `case` statement which
+matches multiple values. To illustrate, we need a procedure which can return
+different numbers of values - we write a new version of `exact-integer-sqrt` to
+return a single value if the remainder is 0:
+
+[source,scheme]
+----
+(define (new-eis n)
+  (let-values (((s r) (exact-integer-sqrt n)))
+    (if (zero? r)
+      s
+      (values s r))))
+----
+
+And then write a function to choose how to display the number:
+
+[source,scheme]
+----
+(define (display-root n)
+  (case-receive (new-eis n)
+    ((s) (display "Exact root: ") (display s) (newline))
+    ((s r) (display "Inexact, with remainder: ") (display r) (newline))))
+
+gosh[r7rs.user]$ (display-root 3)
+Inexact, with remainder: 2
+gosh[r7rs.user]$ (display-root 4)
+Exact root: 2
+----
+
+The second example is `bind/mv`, which can be used as a simple form of procedure
+composition, where multiple values returned from one part are passed on to the
+next procedure in the line. To illustrate this, let's define a procedure to display
+a pair of values:
+
+[source,scheme]
+----
+gosh[r7rs.user]$ (define (display-pair s r) (for-each display (list "(" s ", " r ")" #\newline)))
+display-pair
+----
+
+We can then use `bind/mv` to pass a single value to the `exact-integer-sqrt`
+procedure, generating multiple values, which will then be passed as
+arguments to `display-pair`:
+
+[source,scheme]
+----
+gosh[r7rs.user]$ (bind/mv 13 exact-integer-sqrt display-pair)
+(3, 4)
+----
+
+== Inconsistencies across Schemes
+
+Different Schemes handle multiple values in some contexts in different ways.
+
+For example, Gauche permits multiple-values to be used in single-value contexts, using 
+just the first value:
+
+[source,scheme]
+----
+gosh$ (+ (values 1 2) (values 3 4))
+4
+gosh$  (map (lambda (a) (values a a)) '(1 2 3))
+(1 2 3)
+----
+
+_But_ this is not required behaviour, and indeed the R7RS report states that, for `map`, it is an 
+error if the mapped procedure does not return a single value.
+
+Chez Scheme gives errors in both cases:
+
+[source,scheme]
+----
+Chez Scheme Version 9.5.8
+Copyright 1984-2022 Cisco Systems, Inc.
+
+> (+ (values 1 2) (values 3 4))
+Exception: returned two values to single value return context
+> (map (lambda (a) (values a a)) '(1 2 3))
+Exception: returned two values to single value return context
+----
+
+Kawa only gives an error in the first case, but not the second:
+
+[source,scheme]
+----
+#|kawa:1|# (+ (values 1 2) (values 3 4))
+java.lang.ClassCastException: class gnu.mapping.Values$Values2 cannot be cast to class gnu.math.Numeric 
+#|kawa:2|# (map (lambda (a) (values a a)) '(1 2 3))
+(1 1 2 2 3 3)
+----
+
+This is a potential stumbling block for portable code.
+
