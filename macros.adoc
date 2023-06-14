@@ -101,7 +101,7 @@ and work your way up to *syntax-rules* and then *syntax-case*.
 |=====
 |Implementation|define-macro|syntax-rules|syntax-case|er-macro-
 |Bigloo|x|||
-|Chicken|x|||x
+|Chicken|x|x||x
 |Chez Scheme||x|x|
 |Chibi-Scheme||x||x
 |Gambit|x|x||
