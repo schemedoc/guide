@@ -106,6 +106,7 @@ Every implementation below has the standard *vector* type.
 |Chibi-Scheme||x||x||||||
 |Gambit|x|x||||||||
 |Gauche||x||x||||||
+|GNU Guile|x|x|x|x|x|x|x|x||
 |Ikarus||x|x|||||||
 |Loko Scheme||x|x|||||||
 |MIT Scheme||x||x||||||
